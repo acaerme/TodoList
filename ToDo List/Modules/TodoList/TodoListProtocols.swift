@@ -35,6 +35,8 @@ protocol TodoListPresenterProtocol: AnyObject {
 
 // Router
 protocol TodoListRouterProtocol: AnyObject {
+    var viewController: TodoListViewController? { get set }
+    
     static func createModule() -> TodoListViewController
     // func presentTodoDetail(from view: TodoListViewProtocol, for todo: Todo) // Example
 }

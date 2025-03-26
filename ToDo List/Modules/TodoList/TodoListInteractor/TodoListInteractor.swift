@@ -10,7 +10,12 @@
 import Foundation
 
 class TodoListInteractor: TodoListInteractorProtocol {
+    private let networkManager: NetworkManagerProtocol
     weak var presenter: TodoListPresenterProtocol?
+ 
+    init(networkManager: NetworkManagerProtocol) {
+        self.networkManager = networkManager
+    }
 
     func fetchTodos() {
         // Implementation will go here to fetch todos

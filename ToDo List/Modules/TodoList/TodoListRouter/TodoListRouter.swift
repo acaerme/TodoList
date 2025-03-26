@@ -10,24 +10,10 @@
 import UIKit
 
 class TodoListRouter: TodoListRouterProtocol {
-    weak var viewController: UIViewController?
-
+    weak var viewController: TodoListViewController?
+    
     static func createModule() -> TodoListViewController {
-        let view = TodoListViewController()
-        let interactor = TodoListInteractor()
-        let presenter = TodoListPresenter()
-        let router = TodoListRouter()
-
-        view.presenter = presenter
-
-        interactor.presenter = presenter
-        
-        presenter.view = view
-        presenter.interactor = interactor
-        presenter.router = router
-        
-        router.viewController = view
-
+        let view = DependencyContainer.shared.container.resolve(TodoListViewController.self)!
         return view
     }
 }
