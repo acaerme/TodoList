@@ -9,8 +9,9 @@
 import Foundation
 
 struct Todo {
-    let userId: Int
-    let id: Int
+//    let id: UUID
     let title: String
-    let completed: Bool
+    let description: String
+    let date: Date
+    var completed: Bool
 }

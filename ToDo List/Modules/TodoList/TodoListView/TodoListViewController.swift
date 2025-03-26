@@ -11,12 +11,16 @@ class TodoListViewController: UIViewController, TodoListViewProtocol {
     var presenter: TodoListPresenterProtocol?
 
     func update(with todos: [Todo]) {
-        print(todos)
+        for todo in todos {
+            print(todo.title)
+        }
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .blue
+        view.backgroundColor = .separator
+        
+        presenter?.viewDidLoad()
     }
 }

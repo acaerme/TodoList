@@ -10,7 +10,7 @@ import Foundation
 // MARK: - Protocol
 
 protocol NetworkManagerProtocol {
-    func fetchData() async throws -> NetworkResponse
+    func fetchTodos() async throws -> NetworkResponse
 }
 
 // MARK: - Network Manager
@@ -29,7 +29,7 @@ final class NetworkManager: NetworkManagerProtocol {
     
     // MARK: - Data Fetching
     
-    func fetchData() async throws -> NetworkResponse {
+    func fetchTodos() async throws -> NetworkResponse {
         guard let url = URL(string: urlString) else {
             throw NetworkErrors.invalidUrl
         }
