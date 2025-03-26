@@ -5,18 +5,23 @@
 //  Created by Islam Elikhanov on 26/03/2025.
 //
 
-// TodoListPresenter.swift
-
 import Foundation
 
 class TodoListPresenter: TodoListPresenterProtocol {
+    
+    // MARK: - Properties
+    
     weak var view: TodoListViewProtocol?
     var interactor: TodoListInteractorProtocol?
     var router: TodoListRouterProtocol?
     
+    // MARK: - Lifecycle
+    
     func viewDidLoad() {
         interactor?.fetchTodos()
     }
+    
+    // MARK: - Interactor Output
     
     func interactorDidFetchTodos(with result: Result<[Todo], Error>) {
         switch result {

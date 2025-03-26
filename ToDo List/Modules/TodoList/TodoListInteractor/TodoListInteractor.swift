@@ -10,13 +10,20 @@
 import Foundation
 
 class TodoListInteractor: TodoListInteractorProtocol {
+
+    // MARK: - Properties
+
     private let networkManager: NetworkManagerProtocol
     weak var presenter: TodoListPresenterProtocol?
     
+    // MARK: - Initialization
+
     init(networkManager: NetworkManagerProtocol) {
         self.networkManager = networkManager
     }
     
+    // MARK: - Data Fetching
+
     func fetchTodos() {
         Task {
             do {
