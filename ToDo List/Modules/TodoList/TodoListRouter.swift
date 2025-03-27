@@ -1,10 +1,3 @@
-//
-//  TodoListRouter.swift
-//  ToDo List
-//
-//  Created by Islam Elikhanov on 26/03/2025.
-//
-
 import UIKit
 
 class TodoListRouter: TodoListRouterProtocol {
@@ -13,11 +6,11 @@ class TodoListRouter: TodoListRouterProtocol {
     
     weak var viewController: TodoListViewController?
     
-    // MARK: - Protocol Methods
+    // MARK: - TodoListRouterProtocol Methods
     
     static func createModule() -> TodoListViewController {
         let view = TodoListViewController()
-        let interactor = TodoListInteractor(networkManager: DependencyContainer.shared.container.resolve(NetworkManagerProtocol.self)!) // later is ! safe?
+        let interactor = TodoListInteractor(networkManager: DependencyContainer.shared.container.resolve(NetworkManagerProtocol.self)!)
         let presenter = TodoListPresenter()
         let router = TodoListRouter()
         

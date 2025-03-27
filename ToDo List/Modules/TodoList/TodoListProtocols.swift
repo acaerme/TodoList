@@ -1,44 +1,41 @@
-//
-//  ToDoListProtocols.swift
-//  ToDo List
-//
-//  Created by Islam Elikhanov on 26/03/2025.
-//
-
-// TodoListProtocols.swift
-
 import Foundation
 
-// View
+// MARK: - TodoListViewProtocol
+
 protocol TodoListViewProtocol: AnyObject {
     var presenter: TodoListPresenterProtocol? { get set }
-    
     func update(with todos: [Todo])
 }
 
-// Interactor
+// MARK: - TodoListInteractorProtocol
+
 protocol TodoListInteractorProtocol: AnyObject {
     var presenter: TodoListPresenterProtocol? { get set }
-    
     func fetchTodos()
+    func filterTodos(with searchText: String)
+    func toggleTodoCompletion(for updatedTodo: Todo)
+    func addNewTodo(todo: Todo)
 }
 
-// Presenter
+// MARK: - TodoListPresenterProtocol
+
 protocol TodoListPresenterProtocol: AnyObject {
     var view: TodoListViewProtocol? { get set }
     var interactor: TodoListInteractorProtocol? { get set }
     var router: TodoListRouterProtocol? { get set }
-
+    
     func viewDidLoad()
-    func interactorDidFetchTodos(with result: Result<[Todo], Error>)
+    func updateTodosList(with result: Result<[Todo], Error>)
     func didSelectTodo(todo: Todo)
     func newTodoButtonTapped()
+    func toggleTodoCompletion(for updatedTodo: Todo)
+    func searchForTodos(with searchText: String)
 }
 
-// Router
+// MARK: - TodoListRouterProtocol
+
 protocol TodoListRouterProtocol: AnyObject {
     var viewController: TodoListViewController? { get set }
-    
     static func createModule() -> TodoListViewController
     func showDetails(for todo: Todo)
     func presentNewTodoVC()

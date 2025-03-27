@@ -1,10 +1,3 @@
-//
-//  TodoListViewController.swift
-//  ToDo List
-//
-//  Created by Islam Elikhanov on 26/03/2025.
-//
-
 import UIKit
 import SnapKit
 
@@ -27,13 +20,19 @@ class TodoListViewController: UIViewController, TodoListViewProtocol {
         return tableView
     }()
     
+    private let searchBar: UISearchBar = {
+        let bar = UISearchBar()
+        bar.placeholder = "Search Todos"
+        bar.translatesAutoresizingMaskIntoConstraints = false
+        return bar
+    }()
+    
     private let bottomTabBar: UIView = {
         let view = UIView()
         view.backgroundColor = .darkGray.withAlphaComponent(0.2)
         return view
     }()
     
-    // Label displaying count
     private let taskCountLabel: UILabel = {
         let label = UILabel()
         label.textColor = .white
@@ -48,40 +47,41 @@ class TodoListViewController: UIViewController, TodoListViewProtocol {
         return button
     }()
     
-    // MARK: - Protocol Methods
+    // MARK: - Lifecycle
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        setupView()
+        setupNavigationBar()
+        setupTableView()
+        presenter?.viewDidLoad()
+    }
+    
+    // MARK: - TodoListViewProtocol
     
     func update(with todos: [Todo]) {
         self.todos = todos
-        
         let count = todos.count
         let word = getTaskWord(for: count)
-        
         DispatchQueue.main.async { [weak self] in
             self?.taskCountLabel.text = "\(count) \(word)"
             self?.todoTableView.reloadData()
         }
     }
     
-    // MARK: - Lifecycle
+    // MARK: - Setup Methods
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
+    private func setupView() {
         view.backgroundColor = .black
-        
         title = "Задачи"
-        setupNavigationBar()
-        
-        presenter?.viewDidLoad()
         
         addSubviews()
         setupConstraints()
-        setupTableView()
         
         newTodoButton.addTarget(self, action: #selector(newTodoButtonTapped), for: .touchUpInside)
+        searchBar.delegate = self
+        navigationItem.titleView = searchBar
     }
-    
-    // MARK: - UI Setup
     
     private func addSubviews() {
         view.addSubview(todoTableView)
@@ -112,6 +112,11 @@ class TodoListViewController: UIViewController, TodoListViewProtocol {
         }
     }
     
+    private func setupTableView() {
+        todoTableView.delegate = self
+        todoTableView.dataSource = self
+    }
+    
     private func setupNavigationBar() {
         let appearance = UINavigationBarAppearance()
         appearance.backgroundColor = .black
@@ -121,9 +126,10 @@ class TodoListViewController: UIViewController, TodoListViewProtocol {
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "Назад", style: .plain, target: nil, action: nil)
     }
+    
+    // MARK: - Helper Methods
     
     private func getTaskWord(for count: Int) -> String {
         let rem100 = count % 100
@@ -140,19 +146,14 @@ class TodoListViewController: UIViewController, TodoListViewProtocol {
         }
     }
     
-    // MARK: - Private Methods
-    
-    private func setupTableView() {
-        todoTableView.dataSource = self
-        todoTableView.delegate = self
-    }
+    // MARK: - Actions
     
     @objc private func newTodoButtonTapped() {
         presenter?.newTodoButtonTapped()
     }
 }
 
-// MARK: - TableView DataSource & Delegate
+// MARK: - UITableViewDataSource & UITableViewDelegate
 
 extension TodoListViewController: UITableViewDataSource, UITableViewDelegate {
     
@@ -161,22 +162,34 @@ extension TodoListViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "TodoTableViewCell", for: indexPath) as? TodoTableViewCell
-        else {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "TodoTableViewCell", for: indexPath) as? TodoTableViewCell else {
             return UITableViewCell()
         }
-        
         let todo = todos[indexPath.row]
         cell.configure(with: todo)
-        
+        cell.delegate = self
         return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        
         let todo = todos[indexPath.row]
         presenter?.didSelectTodo(todo: todo)
     }
 }
 
+// MARK: - TodoTableViewCellDelegate
+
+extension TodoListViewController: TodoTableViewCellDelegate {
+    func didToggleTodo(_ updatedTodo: Todo) {
+        presenter?.toggleTodoCompletion(for: updatedTodo)
+    }
+}
+
+// MARK: - UISearchBarDelegate
+
+extension TodoListViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        presenter?.searchForTodos(with: searchText)
+    }
+}
