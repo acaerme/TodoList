@@ -7,6 +7,5 @@ final class TodoDetailsPresenter: TodoDetailsPresenterProtocol {
     
     func saveButtonTapped(todo: Todo) {
         // save
-        router?.dismissVC()
     }
 }

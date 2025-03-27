@@ -1,13 +1,18 @@
-// File: TodoDetailsViewController.swift
 import UIKit
 import SnapKit
 
-final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol {
+enum TodoDetailsMode {
+    case creating
+    case editing
+}
+
+final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol, UITextFieldDelegate {
     
     // MARK: - Properties
     
     var presenter: TodoDetailsPresenterProtocol?
     private var todo: Todo?
+    private var mode: TodoDetailsMode
     
     private let scrollView: UIScrollView = {
         let scroll = UIScrollView()
@@ -26,15 +31,15 @@ final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol
         textField.font = UIFont.boldSystemFont(ofSize: 24)
         textField.textAlignment = .left
         textField.backgroundColor = .clear
-        textField.placeholder = "Enter title"
+        textField.returnKeyType = .done
         return textField
     }()
     
     private let dateLabel: UILabel = {
         let label = UILabel()
-        label.textAlignment = .left
-        label.font = UIFont.systemFont(ofSize: 16)
         label.textColor = .gray
+        label.font = UIFont.systemFont(ofSize: 12)
+        label.textAlignment = .center
         return label
     }()
     
@@ -60,9 +65,12 @@ final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol
                 date: Date(),
                 completed: false)
             
+            self.mode = .creating
+            
             titleTextField.becomeFirstResponder()
         } else {
             self.todo = todo
+            self.mode = .editing
         }
         
         super.init(nibName: nil, bundle: nil)
@@ -80,13 +88,47 @@ final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol
         navigationController?.navigationBar.tintColor = .systemYellow
         navigationItem.largeTitleDisplayMode = .never
         
+        titleTextField.delegate = self
+        
         configureUI()
         setupScrollView()
         addSubviews()
         setupConstraints()
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGesture)
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+
+        guard let presenter = presenter else { return }
+
+        if mode == .creating {
+            if let title = titleTextField.text, !title.isEmpty {
+                let newTodo = Todo(id: UUID(), title: title, description: descriptionTextView.text, date: Date(), completed: false)
+                presenter.saveButtonTapped(todo: newTodo)
+                NotificationCenter.default.post(name: NSNotification.Name("TodoAddedOrUpdated"), object: nil, userInfo: ["todo": newTodo])
+            }
+        } else if mode == .editing {
+            guard let todo = todo else { return }
+
+            let updatedTitle = titleTextField.text ?? ""
+            let updatedDescription = descriptionTextView.text ?? ""
+
+            if updatedTitle != todo.title || updatedDescription != todo.description {
+                let updatedTodo = Todo(id: todo.id, title: updatedTitle, description: updatedDescription, date: todo.date, completed: todo.completed)
+                presenter.saveButtonTapped(todo: updatedTodo)
+                NotificationCenter.default.post(name: NSNotification.Name("TodoAddedOrUpdated"), object: nil, userInfo: ["todo": updatedTodo])
+            }
+        }
     }
     
     // MARK: - UI Setup
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
     
     private func configureUI() {
         let formatter = DateFormatter()
@@ -131,9 +173,8 @@ final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol
         }
         
         dateLabel.snp.makeConstraints { maker in
-            maker.top.equalTo(titleTextField.snp.bottom).offset(12)
-            maker.left.right.equalToSuperview().inset(20)
-            maker.height.equalTo(20)
+            maker.top.equalTo(titleTextField.snp.bottom).offset(8)
+            maker.left.equalToSuperview().inset(20)
         }
         
         descriptionTextView.snp.makeConstraints { maker in
@@ -141,5 +182,13 @@ final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol
             maker.left.right.equalToSuperview().inset(20)
             maker.bottom.equalTo(contentView.snp.bottom).inset(20)
         }
+    }
+    
+    // MARK: - UITextFieldDelegate
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        descriptionTextView.becomeFirstResponder()
+        return true
     }
 }

@@ -13,7 +13,7 @@ final class TodoListPresenter: TodoListPresenterProtocol {
     init() {
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(todoAdded(_:)),
-                                               name: NSNotification.Name("TodoAdded"),
+                                               name: NSNotification.Name("TodoAddedOrUpdated"),
                                                object: nil)
     }
     
@@ -68,6 +68,6 @@ final class TodoListPresenter: TodoListPresenterProtocol {
     
     @objc private func todoAdded(_ notification: Notification) {
         guard let newTodo = notification.userInfo?["todo"] as? Todo else { return }
-        interactor?.addNewTodo(todo: newTodo)
+        interactor?.addOrUpdate(todo: newTodo)
     }
 }
