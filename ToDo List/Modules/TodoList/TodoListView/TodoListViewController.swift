@@ -61,8 +61,10 @@ class TodoListViewController: UIViewController, TodoListViewProtocol {
     
     func update(with todos: [Todo]) {
         self.todos = todos
+        
         let count = todos.count
         let word = getTaskWord(for: count)
+        
         DispatchQueue.main.async { [weak self] in
             self?.taskCountLabel.text = "\(count) \(word)"
             self?.todoTableView.reloadData()
