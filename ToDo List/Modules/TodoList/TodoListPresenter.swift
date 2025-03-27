@@ -21,7 +21,7 @@ class TodoListPresenter: TodoListPresenterProtocol {
         interactor?.fetchTodos()
     }
     
-    // MARK: - Interactor Output
+    // MARK: - Protocol Methods
     
     func interactorDidFetchTodos(with result: Result<[Todo], Error>) {
         switch result {
@@ -30,5 +30,9 @@ class TodoListPresenter: TodoListPresenterProtocol {
         case .failure(let error):
             print("Error fetching todos: \(error)") // later
         }
+    }
+    
+    func didSelectTodo(todo: Todo) {
+        router?.showDetails(for: todo)
     }
 }

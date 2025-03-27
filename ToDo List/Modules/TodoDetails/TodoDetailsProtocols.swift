@@ -30,5 +30,5 @@ protocol TodoDetailsPresenterProtocol: AnyObject {
 protocol TodoDetailsRouterProtocol: AnyObject {
     var viewController: TodoDetailsViewController? { get set }
     
-    static func createModule() -> TodoDetailsViewController
+    static func createModule(with: Todo) -> TodoDetailsViewController
 }

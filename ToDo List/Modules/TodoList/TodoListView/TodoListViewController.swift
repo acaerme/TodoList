@@ -75,6 +75,8 @@ class TodoListViewController: UIViewController, TodoListViewProtocol {
         navigationController?.navigationBar.prefersLargeTitles = true
         navigationController?.navigationBar.standardAppearance = appearance
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: "Назад", style: .plain, target: nil, action: nil)
     }
     
     // MARK: - Private Methods
@@ -107,6 +109,9 @@ extension TodoListViewController: UITableViewDataSource, UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        
+        let todo = todos[indexPath.row]
+        presenter?.didSelectTodo(todo: todo)
     }
 }
 

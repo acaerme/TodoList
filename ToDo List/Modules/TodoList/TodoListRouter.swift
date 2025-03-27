@@ -35,7 +35,7 @@ class TodoListRouter: TodoListRouterProtocol {
     }
     
     func showDetails(for todo: Todo) {
-        //        let detailsViewController = TodoDetailsViewController(todo: todo)
-        //        viewController?.navigationController?.pushViewController(detailsViewController, animated: true)
+        let detailsViewController = TodoDetailsRouter.createModule(with: todo)
+        viewController?.navigationController?.pushViewController(detailsViewController, animated: true)
     }
 }

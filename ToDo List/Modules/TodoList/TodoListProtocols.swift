@@ -31,6 +31,7 @@ protocol TodoListPresenterProtocol: AnyObject {
 
     func viewDidLoad()
     func interactorDidFetchTodos(with result: Result<[Todo], Error>)
+    func didSelectTodo(todo: Todo)
 }
 
 // Router
