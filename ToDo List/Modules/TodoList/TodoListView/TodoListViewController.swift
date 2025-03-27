@@ -163,16 +163,15 @@ final class TodoListViewController: UIViewController, TodoListViewProtocol {
     
     @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
             let point = gesture.location(in: todoTableView)
-            guard let indexPath = todoTableView.indexPathForRow(at: point),
-                  let cell = todoTableView.cellForRow(at: indexPath) else {
-                return
-            }
+            guard let indexPath = todoTableView.indexPathForRow(at: point) else { return }
             
             switch gesture.state {
             case .began:
                 let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "Action 1", style: .default, handler: { _ in
-                    // Action1 implementation
+                alert.addAction(UIAlertAction(title: "Редактировать", style: .default, handler: { [weak self] _ in
+                    let todo = self?.todos[indexPath.row]
+                    
+                    self?.presenter?.editButtonTapped(todo: todo)
                 }))
                 alert.addAction(UIAlertAction(title: "Удалить", style: .destructive, handler: { [weak self] _ in
                     let todo = self?.todos[indexPath.row]

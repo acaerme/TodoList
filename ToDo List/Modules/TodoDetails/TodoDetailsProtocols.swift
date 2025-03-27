@@ -26,6 +26,6 @@ protocol TodoDetailsPresenterProtocol: AnyObject {
 
 protocol TodoDetailsRouterProtocol: AnyObject {
     var viewController: TodoDetailsViewController? { get set }
-    static func createModule(with: Todo) -> TodoDetailsViewController
+    static func createModule(with: Todo?) -> TodoDetailsViewController
     func dismissVC()
 }

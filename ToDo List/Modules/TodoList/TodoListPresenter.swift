@@ -41,7 +41,7 @@ final class TodoListPresenter: TodoListPresenterProtocol {
     }
     
     func newTodoButtonTapped() {
-        router?.presentNewTodoVC()
+        router?.presentTodoDetailsVC(todo: nil)
     }
     
     func toggleTodoCompletion(for updatedTodo: Todo) {
@@ -50,6 +50,12 @@ final class TodoListPresenter: TodoListPresenterProtocol {
     
     func searchForTodos(with searchText: String) {
         interactor?.filterTodos(with: searchText)
+    }
+    
+    func editButtonTapped(todo: Todo?) {
+        guard let todo = todo else { return }
+        
+        router?.presentTodoDetailsVC(todo: todo)
     }
     
     func deleteButtonTapped(todo: Todo?) {

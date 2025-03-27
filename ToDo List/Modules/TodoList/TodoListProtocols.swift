@@ -31,6 +31,7 @@ protocol TodoListPresenterProtocol: AnyObject {
     func newTodoButtonTapped()
     func toggleTodoCompletion(for updatedTodo: Todo)
     func searchForTodos(with searchText: String)
+    func editButtonTapped(todo: Todo?)
     func deleteButtonTapped(todo: Todo?)
 }
 
@@ -40,5 +41,5 @@ protocol TodoListRouterProtocol: AnyObject {
     var viewController: TodoListViewController? { get set }
     static func createModule() -> TodoListViewController
     func showDetails(for todo: Todo)
-    func presentNewTodoVC()
+    func presentTodoDetailsVC(todo: Todo?)
 }
