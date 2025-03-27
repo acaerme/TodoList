@@ -36,7 +36,6 @@ class TodoListViewController: UIViewController, TodoListViewProtocol {
     // Label displaying count
     private let taskCountLabel: UILabel = {
         let label = UILabel()
-        label.text = "n задач"
         label.textColor = .white
         label.textAlignment = .center
         return label
@@ -54,7 +53,11 @@ class TodoListViewController: UIViewController, TodoListViewProtocol {
     func update(with todos: [Todo]) {
         self.todos = todos
         
+        let count = todos.count
+        let word = getTaskWord(for: count)
+        
         DispatchQueue.main.async { [weak self] in
+            self?.taskCountLabel.text = "\(count) \(word)"
             self?.todoTableView.reloadData()
         }
     }
@@ -120,6 +123,21 @@ class TodoListViewController: UIViewController, TodoListViewProtocol {
         navigationController?.navigationBar.scrollEdgeAppearance = appearance
         
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "Назад", style: .plain, target: nil, action: nil)
+    }
+    
+    private func getTaskWord(for count: Int) -> String {
+        let rem100 = count % 100
+        let rem10 = count % 10
+        
+        if rem100 >= 11 && rem100 <= 14 {
+            return "задач"
+        } else if rem10 == 1 {
+            return "задача"
+        } else if rem10 >= 2 && rem10 <= 4 {
+            return "задачи"
+        } else {
+            return "задач"
+        }
     }
     
     // MARK: - Private Methods
