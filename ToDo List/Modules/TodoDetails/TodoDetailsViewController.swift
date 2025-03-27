@@ -11,7 +11,7 @@ import UIKit
 class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol {
     
     var presenter: TodoDetailsPresenterProtocol?
-    //    private let todo: Todo
+    private let todo: Todo
     
     // MARK: - UI Elements
     
@@ -51,19 +51,13 @@ class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol {
         navigationController?.navigationBar.tintColor = .systemYellow
         navigationItem.largeTitleDisplayMode = .never
         
+        configureUI()
         addSubviews()
         setupConstraints()
     }
     
     init(todo: Todo) {
-        titleLabel.text = todo.title
-        
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd.MM.yyyy"
-        dateLabel.text = dateFormatter.string(from: todo.date).replacingOccurrences(of: ".", with: "/")
-        
-        descriptionTextView.text = todo.description
-        
+        self.todo = todo
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -95,5 +89,15 @@ class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol {
             maker.left.right.equalToSuperview().inset(20)
             maker.height.equalTo(descriptionTextView.contentSize.height)
         }
+    }
+    
+    private func configureUI() {
+        titleLabel.text = todo.title
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd.MM.yyyy"
+        dateLabel.text = dateFormatter.string(from: todo.date).replacingOccurrences(of: ".", with: "/")
+        
+        descriptionTextView.text = todo.description
     }
 }

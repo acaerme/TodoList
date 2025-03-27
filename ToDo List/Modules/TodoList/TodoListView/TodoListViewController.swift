@@ -27,6 +27,28 @@ class TodoListViewController: UIViewController, TodoListViewProtocol {
         return tableView
     }()
     
+    private let bottomTabBar: UIView = {
+        let view = UIView()
+        view.backgroundColor = .darkGray.withAlphaComponent(0.2)
+        return view
+    }()
+    
+    // Label displaying count
+    private let taskCountLabel: UILabel = {
+        let label = UILabel()
+        label.text = "n задач"
+        label.textColor = .white
+        label.textAlignment = .center
+        return label
+    }()
+    
+    private let newTodoButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "square.and.pencil"), for: .normal)
+        button.tintColor = .systemYellow
+        return button
+    }()
+    
     // MARK: - Protocol Methods
     
     func update(with todos: [Todo]) {
@@ -58,11 +80,30 @@ class TodoListViewController: UIViewController, TodoListViewProtocol {
     
     private func addSubviews() {
         view.addSubview(todoTableView)
+        view.addSubview(bottomTabBar)
+        bottomTabBar.addSubview(taskCountLabel)
+        bottomTabBar.addSubview(newTodoButton)
     }
     
     private func setupConstraints() {
         todoTableView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
+            make.top.left.right.equalToSuperview()
+            make.bottom.equalTo(bottomTabBar.snp.top)
+        }
+        
+        bottomTabBar.snp.makeConstraints { make in
+            make.left.right.bottom.equalToSuperview()
+            make.height.equalTo(80)
+        }
+        
+        taskCountLabel.snp.makeConstraints { make in
+            make.top.equalToSuperview().offset(16)
+            make.centerX.equalToSuperview()
+        }
+        
+        newTodoButton.snp.makeConstraints { make in
+            make.top.equalToSuperview().offset(16)
+            make.right.equalToSuperview().inset(20)
         }
     }
     
