@@ -40,7 +40,8 @@ class TodoListRouter: TodoListRouterProtocol {
     }
     
     func presentNewTodoVC() {
-        let newTodoViewController = NewTodoRouter.createModule()
-        viewController?.present(newTodoViewController, animated: true)
+        let addTodoViewController = AddTodoRouter.createModule()
+        addTodoViewController.modalPresentationStyle = .fullScreen
+        viewController?.present(addTodoViewController, animated: true)
     }
 }

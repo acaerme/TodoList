@@ -98,6 +98,6 @@ class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol {
         dateFormatter.dateFormat = "dd.MM.yyyy"
         dateLabel.text = dateFormatter.string(from: todo.date).replacingOccurrences(of: ".", with: "/")
         
-        descriptionTextView.text = todo.description
+        descriptionTextView.text = todo.description != nil ? todo.description : "No description"
     }
 }
