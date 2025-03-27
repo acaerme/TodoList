@@ -1,23 +1,18 @@
-//
-//  AddTodoProtocols.swift
-//  ToDo List
-//
-//  Created by Islam Elikhanov on 27/03/2025.
-//
+// MARK: - View
 
-// View
 protocol AddTodoViewProtocol: AnyObject {
     var presenter: AddTodoPresenterProtocol? { get set }
 }
 
-// Interactor
+// MARK: - Interactor
+
 protocol AddTodoInteractorProtocol: AnyObject {
     var presenter: AddTodoPresenterProtocol? { get set }
-    
     func save(todo: Todo)
 }
 
-// Presenter
+// MARK: - Presenter
+
 protocol AddTodoPresenterProtocol: AnyObject {
     var view: AddTodoViewProtocol? { get set }
     var interactor: AddTodoInteractorProtocol? { get set }
@@ -28,7 +23,8 @@ protocol AddTodoPresenterProtocol: AnyObject {
     func didSaveTodo()
 }
 
-// Router
+// MARK: - Router
+
 protocol AddTodoRouterProtocol: AnyObject {
     var viewController: AddTodoViewController? { get set }
     

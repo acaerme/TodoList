@@ -1,20 +1,21 @@
-//
-//  AddTodoInteractor.swift
-//  ToDo List
-//
-//  Created by Islam Elikhanov on 27/03/2025.
-//
-
 import Foundation
 
 class AddTodoInteractor: AddTodoInteractorProtocol {
+    
+    // MARK: - Properties
+    
     weak var presenter: AddTodoPresenterProtocol?
     
+    // MARK: - Business Logic
+    
     func save(todo: Todo) {
-        // save
         
-        NotificationCenter.default.post(name: NSNotification.Name("TodoAdded"), object: nil, userInfo: ["todo": todo])
-            
+        NotificationCenter.default.post(
+            name: NSNotification.Name("TodoAdded"),
+            object: nil,
+            userInfo: ["todo": todo]
+        )
+        
         presenter?.didSaveTodo()
     }
 }

@@ -1,14 +1,12 @@
-//
-//  AddTodoRouter.swift
-//  ToDo List
-//
-//  Created by Islam Elikhanov on 27/03/2025.
-//
-
 import UIKit
 
 class AddTodoRouter: AddTodoRouterProtocol {
+    
+    // MARK: - Properties
+    
     weak var viewController: AddTodoViewController?
+    
+    // MARK: - Module Setup
     
     static func createModule() -> AddTodoViewController {
         let view = AddTodoViewController()
@@ -16,6 +14,7 @@ class AddTodoRouter: AddTodoRouterProtocol {
         let interactor = AddTodoInteractor()
         let router = AddTodoRouter()
         
+        // Inject dependencies
         view.presenter = presenter
         
         interactor.presenter = presenter
@@ -28,6 +27,8 @@ class AddTodoRouter: AddTodoRouterProtocol {
         
         return view
     }
+    
+    // MARK: - Navigation
     
     func dismissVC() {
         viewController?.dismiss(animated: true, completion: nil)
