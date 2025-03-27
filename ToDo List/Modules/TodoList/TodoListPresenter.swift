@@ -35,4 +35,8 @@ class TodoListPresenter: TodoListPresenterProtocol {
     func didSelectTodo(todo: Todo) {
         router?.showDetails(for: todo)
     }
+    
+    func newTodoButtonTapped() {
+        router?.presentNewTodoVC()
+    }
 }

@@ -1,5 +1,5 @@
 //
-//  ToDoListProtocols.swift
+//  ToDoDetailsProtocols.swift
 //  ToDo List
 //
 //  Created by Islam Elikhanov on 26/03/2025.

@@ -74,6 +74,8 @@ class TodoListViewController: UIViewController, TodoListViewProtocol {
         addSubviews()
         setupConstraints()
         setupTableView()
+        
+        newTodoButton.addTarget(self, action: #selector(newTodoButtonTapped), for: .touchUpInside)
     }
     
     // MARK: - UI Setup
@@ -125,6 +127,10 @@ class TodoListViewController: UIViewController, TodoListViewProtocol {
     private func setupTableView() {
         todoTableView.dataSource = self
         todoTableView.delegate = self
+    }
+    
+    @objc private func newTodoButtonTapped() {
+        presenter?.newTodoButtonTapped()
     }
 }
 

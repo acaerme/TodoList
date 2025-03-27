@@ -32,6 +32,7 @@ protocol TodoListPresenterProtocol: AnyObject {
     func viewDidLoad()
     func interactorDidFetchTodos(with result: Result<[Todo], Error>)
     func didSelectTodo(todo: Todo)
+    func newTodoButtonTapped()
 }
 
 // Router
@@ -40,4 +41,5 @@ protocol TodoListRouterProtocol: AnyObject {
     
     static func createModule() -> TodoListViewController
     func showDetails(for todo: Todo)
+    func presentNewTodoVC()
 }
