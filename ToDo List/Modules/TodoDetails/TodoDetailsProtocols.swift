@@ -18,6 +18,8 @@ protocol TodoDetailsPresenterProtocol: AnyObject {
     var view: TodoDetailsViewProtocol? { get set }
     var interactor: TodoDetailsInteractorProtocol? { get set }
     var router: TodoDetailsRouterProtocol? { get set }
+    
+    func saveButtonTapped(todo: Todo)
 }
 
 // MARK: - Router Protocol

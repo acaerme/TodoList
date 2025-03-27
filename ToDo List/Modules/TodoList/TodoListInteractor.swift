@@ -21,7 +21,8 @@ final class TodoListInteractor: TodoListInteractorProtocol {
             do {
                 let networkResponse = try await networkManager.fetchTodos()
                 allTodos = networkResponse.todos.map {
-                    Todo(title: $0.todo,
+                    Todo(id: UUID(),
+                         title: $0.todo,
                          description: "Description",
                          date: Date(),
                          completed: $0.completed)
@@ -43,7 +44,7 @@ final class TodoListInteractor: TodoListInteractorProtocol {
     }
     
     func toggleTodoCompletion(for updatedTodo: Todo) {
-        if let index = allTodos.firstIndex(where: { $0.title == updatedTodo.title }) {
+        if let index = allTodos.firstIndex(where: { $0.id == updatedTodo.id }) {
             allTodos[index].completed.toggle()
         }
         presenter?.updateTodosList(with: .success(allTodos))

@@ -143,6 +143,7 @@ final class AddTodoViewController: UIViewController, AddTodoViewProtocol {
     
     @objc private func saveButtonTapped() {
         let todo = Todo(
+            id: UUID(),
             title: titleTextField.text ?? "",
             description: descriptionTextView.text.isEmpty ? nil : descriptionTextView.text,
             date: Date(),

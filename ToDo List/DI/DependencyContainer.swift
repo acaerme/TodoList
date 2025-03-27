@@ -8,7 +8,6 @@ final class DependencyContainer {
     private init() {
         container = Container()
         
-        // Register NetworkManager
         container.register(NetworkManagerProtocol.self) { _ in
             NetworkManager(url: "https://dummyjson.com/todos")
         }
