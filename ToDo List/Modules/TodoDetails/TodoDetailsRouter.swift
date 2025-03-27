@@ -25,4 +25,10 @@ final class TodoDetailsRouter: TodoDetailsRouterProtocol {
 
         return view
     }
+    
+    // MARK: - Navigation
+    
+    func dismissVC() {
+        viewController?.dismiss(animated: true, completion: nil)
+    }
 }

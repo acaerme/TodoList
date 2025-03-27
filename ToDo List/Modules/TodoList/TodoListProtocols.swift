@@ -15,6 +15,7 @@ protocol TodoListInteractorProtocol: AnyObject {
     func filterTodos(with searchText: String)
     func toggleTodoCompletion(for updatedTodo: Todo)
     func addNewTodo(todo: Todo)
+    func delete(todo: Todo)
 }
 
 // MARK: - TodoListPresenterProtocol
@@ -30,6 +31,7 @@ protocol TodoListPresenterProtocol: AnyObject {
     func newTodoButtonTapped()
     func toggleTodoCompletion(for updatedTodo: Todo)
     func searchForTodos(with searchText: String)
+    func deleteButtonTapped(todo: Todo?)
 }
 
 // MARK: - TodoListRouterProtocol

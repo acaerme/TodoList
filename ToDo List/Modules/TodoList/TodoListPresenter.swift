@@ -52,6 +52,12 @@ final class TodoListPresenter: TodoListPresenterProtocol {
         interactor?.filterTodos(with: searchText)
     }
     
+    func deleteButtonTapped(todo: Todo?) {
+        guard let todo = todo else { return }
+        
+        interactor?.delete(todo: todo)
+    }
+    
     // MARK: - Notification Handlers
     
     @objc private func todoAdded(_ notification: Notification) {

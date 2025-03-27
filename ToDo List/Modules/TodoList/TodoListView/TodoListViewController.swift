@@ -55,6 +55,7 @@ final class TodoListViewController: UIViewController, TodoListViewProtocol {
         setupNavigationBar()
         setupTableView()
         presenter?.viewDidLoad()
+        setupLongPressGesture()
     }
     
     // MARK: - TodoListViewProtocol
@@ -131,6 +132,12 @@ final class TodoListViewController: UIViewController, TodoListViewProtocol {
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "Назад", style: .plain, target: nil, action: nil)
     }
     
+    private func setupLongPressGesture() {
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
+        longPress.minimumPressDuration = 0.5 // Adjust the press duration if needed
+        todoTableView.addGestureRecognizer(longPress)
+    }
+    
     // MARK: - Helper Methods
     
     private func getTaskWord(for count: Int) -> String {
@@ -153,6 +160,31 @@ final class TodoListViewController: UIViewController, TodoListViewProtocol {
     @objc private func newTodoButtonTapped() {
         presenter?.newTodoButtonTapped()
     }
+    
+    @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+            let point = gesture.location(in: todoTableView)
+            guard let indexPath = todoTableView.indexPathForRow(at: point),
+                  let cell = todoTableView.cellForRow(at: indexPath) else {
+                return
+            }
+            
+            switch gesture.state {
+            case .began:
+                let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Action 1", style: .default, handler: { _ in
+                    // Action1 implementation
+                }))
+                alert.addAction(UIAlertAction(title: "Удалить", style: .destructive, handler: { [weak self] _ in
+                    let todo = self?.todos[indexPath.row]
+                    
+                    self?.presenter?.deleteButtonTapped(todo: todo)
+                }))
+                alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+                present(alert, animated: true)
+            default:
+                break
+            }
+        }
 }
 
 // MARK: - UITableViewDataSource & UITableViewDelegate

@@ -54,4 +54,11 @@ final class TodoListInteractor: TodoListInteractorProtocol {
         allTodos.insert(todo, at: 0)
         presenter?.updateTodosList(with: .success(allTodos))
     }
+    
+    func delete(todo: Todo) {
+        if let index = allTodos.firstIndex(where: { $0.id == todo.id }) {
+            allTodos.remove(at: index)
+        }
+        presenter?.updateTodosList(with: .success(allTodos))
+    }
 }
