@@ -1,6 +1,6 @@
 import Foundation
 
-class TodoListInteractor: TodoListInteractorProtocol {
+final class TodoListInteractor: TodoListInteractorProtocol {
     
     // MARK: - Properties
     

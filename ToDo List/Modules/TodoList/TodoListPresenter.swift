@@ -1,6 +1,6 @@
 import Foundation
 
-class TodoListPresenter: TodoListPresenterProtocol {
+final class TodoListPresenter: TodoListPresenterProtocol {
     
     // MARK: - Properties
     

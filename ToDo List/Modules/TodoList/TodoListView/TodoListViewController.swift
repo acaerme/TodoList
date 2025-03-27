@@ -1,7 +1,7 @@
 import UIKit
 import SnapKit
 
-class TodoListViewController: UIViewController, TodoListViewProtocol {
+final class TodoListViewController: UIViewController, TodoListViewProtocol {
     
     // MARK: - Properties
     

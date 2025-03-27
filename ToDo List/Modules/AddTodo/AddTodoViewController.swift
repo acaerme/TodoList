@@ -1,7 +1,7 @@
 import UIKit
 import SnapKit
 
-class AddTodoViewController: UIViewController, AddTodoViewProtocol {
+final class AddTodoViewController: UIViewController, AddTodoViewProtocol {
     
     // MARK: - Properties
     

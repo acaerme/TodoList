@@ -5,7 +5,7 @@ protocol TodoTableViewCellDelegate: AnyObject {
     func didToggleTodo(_ updatedTodo: Todo)
 }
 
-class TodoTableViewCell: UITableViewCell {
+final class TodoTableViewCell: UITableViewCell {
     
     // MARK: - Properties
     

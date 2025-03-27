@@ -1,6 +1,6 @@
 import UIKit
 
-class TodoListRouter: TodoListRouterProtocol {
+final class TodoListRouter: TodoListRouterProtocol {
     
     // MARK: - Properties
     

@@ -1,6 +1,6 @@
 import Foundation
 
-class AddTodoInteractor: AddTodoInteractorProtocol {
+final class AddTodoInteractor: AddTodoInteractorProtocol {
     
     // MARK: - Properties
     

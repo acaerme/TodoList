@@ -1,6 +1,6 @@
 import UIKit
 
-class AddTodoRouter: AddTodoRouterProtocol {
+final class AddTodoRouter: AddTodoRouterProtocol {
     
     // MARK: - Properties
     

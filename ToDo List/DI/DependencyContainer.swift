@@ -1,15 +1,6 @@
-//
-//  DependencyContainer.swift
-//  ToDo List
-//
-//  Created by Islam Elikhanov on 26/03/2025.
-//
-
-// DependencyContainer.swift
-
 import Swinject
 
-class DependencyContainer {
+final class DependencyContainer {
     static let shared = DependencyContainer()
     
     let container: Container

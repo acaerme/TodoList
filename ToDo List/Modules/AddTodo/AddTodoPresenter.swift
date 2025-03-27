@@ -1,6 +1,6 @@
 import Foundation
 
-class AddTodoPresenter: AddTodoPresenterProtocol {
+final class AddTodoPresenter: AddTodoPresenterProtocol {
     
     // MARK: - Properties
     
