@@ -59,10 +59,11 @@ final class TodoListInteractor: TodoListInteractorProtocol {
             presenter?.updateTodosList(with: .success(allTodos))
     }
     
-    func delete(todo: Todo) {
-        if let index = allTodos.firstIndex(where: { $0.id == todo.id }) {
+    func delete(id: UUID) {
+        if let index = allTodos.firstIndex(where: { $0.id == id }) {
             allTodos.remove(at: index)
         }
+
         presenter?.updateTodosList(with: .success(allTodos))
     }
 }

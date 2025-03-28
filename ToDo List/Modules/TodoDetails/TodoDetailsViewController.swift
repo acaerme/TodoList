@@ -6,13 +6,15 @@ enum TodoDetailsMode {
     case editing
 }
 
-final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol, UITextFieldDelegate {
+final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol {
     
     // MARK: - Properties
     
     var presenter: TodoDetailsPresenterProtocol?
     private var todo: Todo?
     private var mode: TodoDetailsMode
+    
+    // MARK: - UI Components
     
     private let scrollView: UIScrollView = {
         let scroll = UIScrollView()
@@ -57,22 +59,13 @@ final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol
     // MARK: - Initializers
     
     init(todo: Todo? = nil) {
-        if todo == nil {
-            self.todo = Todo(
-                id: UUID(),
-                title: "",
-                description: nil,
-                date: Date(),
-                completed: false)
-            
-            self.mode = .creating
-            
-            titleTextField.becomeFirstResponder()
-        } else {
+        if let todo = todo {
             self.todo = todo
             self.mode = .editing
+        } else {
+            self.mode = .creating
+            // Auto-focusing will be handled in viewDidAppear.
         }
-        
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -80,69 +73,48 @@ final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol
         fatalError("init(coder:) has not been implemented")
     }
     
-    // MARK: - Lifecycle
+    // MARK: - Lifecycle Methods
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .black
-        navigationController?.navigationBar.tintColor = .systemYellow
-        navigationItem.largeTitleDisplayMode = .never
-        
-        titleTextField.delegate = self
-        
-        configureUI()
-        setupScrollView()
-        addSubviews()
-        setupConstraints()
-        
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        view.addGestureRecognizer(tapGesture)
+        configureView()
+        configureTextField()
+        setupUIComponents()
+        setupGesture()
+        configureContent()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if mode == .creating {
+            titleTextField.becomeFirstResponder()
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-
-        guard let presenter = presenter else { return }
-
-        if mode == .creating {
-            if let title = titleTextField.text, !title.isEmpty {
-                let newTodo = Todo(id: UUID(), title: title, description: descriptionTextView.text, date: Date(), completed: false)
-                presenter.saveButtonTapped(todo: newTodo)
-                NotificationCenter.default.post(name: NSNotification.Name("TodoAddedOrUpdated"), object: nil, userInfo: ["todo": newTodo])
-            }
-        } else if mode == .editing {
-            guard let todo = todo else { return }
-
-            let updatedTitle = titleTextField.text ?? ""
-            let updatedDescription = descriptionTextView.text ?? ""
-
-            if updatedTitle != todo.title || updatedDescription != todo.description {
-                let updatedTodo = Todo(id: todo.id, title: updatedTitle, description: updatedDescription, date: todo.date, completed: todo.completed)
-                presenter.saveButtonTapped(todo: updatedTodo)
-                NotificationCenter.default.post(name: NSNotification.Name("TodoAddedOrUpdated"), object: nil, userInfo: ["todo": updatedTodo])
-            }
-        }
+        presenter?.handleTodo(title: titleTextField.text,
+                              description: descriptionTextView.text,
+                              mode: mode,
+                              todo: todo)
     }
     
-    // MARK: - UI Setup
+    // MARK: - UI Setup Methods
     
-    @objc private func dismissKeyboard() {
-        view.endEditing(true)
+    private func configureView() {
+        view.backgroundColor = .black
+        navigationController?.navigationBar.tintColor = .systemYellow
+        navigationItem.largeTitleDisplayMode = .never
     }
     
-    private func configureUI() {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd/MM/yyyy"
-        
-        if let todo = todo {
-            titleTextField.text = todo.title
-            dateLabel.text = formatter.string(from: Date())
-            descriptionTextView.text = todo.description ?? ""
-        } else {
-            titleTextField.text = ""
-            dateLabel.text = formatter.string(from: Date())
-            descriptionTextView.text = ""
-        }
+    private func configureTextField() {
+        titleTextField.delegate = self
+    }
+    
+    private func setupUIComponents() {
+        setupScrollView()
+        addSubviews()
+        setupConstraints()
     }
     
     private func setupScrollView() {
@@ -184,8 +156,34 @@ final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol
         }
     }
     
-    // MARK: - UITextFieldDelegate
+    private func setupGesture() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        view.addGestureRecognizer(tapGesture)
+    }
     
+    private func configureContent() {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd/MM/yyyy"
+        dateLabel.text = formatter.string(from: Date())
+        
+        if let todo = todo {
+            titleTextField.text = todo.title
+            descriptionTextView.text = todo.description ?? ""
+        } else {
+            titleTextField.text = ""
+            descriptionTextView.text = ""
+        }
+    }
+    
+    // MARK: - Actions
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+}
+// MARK: - UITextFieldDelegate
+
+extension TodoDetailsViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         descriptionTextView.becomeFirstResponder()

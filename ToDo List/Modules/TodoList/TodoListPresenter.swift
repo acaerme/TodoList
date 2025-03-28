@@ -12,8 +12,12 @@ final class TodoListPresenter: TodoListPresenterProtocol {
     
     init() {
         NotificationCenter.default.addObserver(self,
-                                               selector: #selector(todoAdded(_:)),
+                                               selector: #selector(todoAddedorUpdated(_:)),
                                                name: NSNotification.Name("TodoAddedOrUpdated"),
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(todoDeleted(_:)),
+                                               name: NSNotification.Name("TodoDeleted"),
                                                object: nil)
     }
     
@@ -32,7 +36,7 @@ final class TodoListPresenter: TodoListPresenterProtocol {
         case .success(let todos):
             view?.update(with: todos)
         case .failure(let error):
-            print("Error fetching todos: \(error)")
+            print("Error fetching todos: \(error)") // later
         }
     }
     
@@ -61,13 +65,18 @@ final class TodoListPresenter: TodoListPresenterProtocol {
     func deleteButtonTapped(todo: Todo?) {
         guard let todo = todo else { return }
         
-        interactor?.delete(todo: todo)
+        interactor?.delete(id: todo.id)
     }
     
     // MARK: - Notification Handlers
     
-    @objc private func todoAdded(_ notification: Notification) {
+    @objc private func todoAddedorUpdated(_ notification: Notification) {
         guard let newTodo = notification.userInfo?["todo"] as? Todo else { return }
         interactor?.addOrUpdate(todo: newTodo)
+    }
+    
+    @objc private func todoDeleted(_ notification: Notification) {
+        guard let todoId = notification.userInfo?["todoId"] as? UUID else { return }
+        interactor?.delete(id: todoId)
     }
 }

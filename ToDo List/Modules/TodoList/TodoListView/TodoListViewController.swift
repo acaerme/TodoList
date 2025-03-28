@@ -134,7 +134,7 @@ final class TodoListViewController: UIViewController, TodoListViewProtocol {
     
     private func setupLongPressGesture() {
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
-        longPress.minimumPressDuration = 0.5 // Adjust the press duration if needed
+        longPress.minimumPressDuration = 0.5 
         todoTableView.addGestureRecognizer(longPress)
     }
     
@@ -162,28 +162,28 @@ final class TodoListViewController: UIViewController, TodoListViewProtocol {
     }
     
     @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
-            let point = gesture.location(in: todoTableView)
-            guard let indexPath = todoTableView.indexPathForRow(at: point) else { return }
-            
-            switch gesture.state {
-            case .began:
-                let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "Редактировать", style: .default, handler: { [weak self] _ in
-                    let todo = self?.todos[indexPath.row]
-                    
-                    self?.presenter?.editButtonTapped(todo: todo)
-                }))
-                alert.addAction(UIAlertAction(title: "Удалить", style: .destructive, handler: { [weak self] _ in
-                    let todo = self?.todos[indexPath.row]
-                    
-                    self?.presenter?.deleteButtonTapped(todo: todo)
-                }))
-                alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
-                present(alert, animated: true)
-            default:
-                break
-            }
+        let point = gesture.location(in: todoTableView)
+        guard let indexPath = todoTableView.indexPathForRow(at: point) else { return }
+        
+        switch gesture.state {
+        case .began:
+            let alert = UIAlertController(title: nil, message: nil, preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Редактировать", style: .default, handler: { [weak self] _ in
+                let todo = self?.todos[indexPath.row]
+                
+                self?.presenter?.editButtonTapped(todo: todo)
+            }))
+            alert.addAction(UIAlertAction(title: "Удалить", style: .destructive, handler: { [weak self] _ in
+                let todo = self?.todos[indexPath.row]
+                
+                self?.presenter?.deleteButtonTapped(todo: todo)
+            }))
+            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            present(alert, animated: true)
+        default:
+            break
         }
+    }
 }
 
 // MARK: - UITableViewDataSource & UITableViewDelegate
