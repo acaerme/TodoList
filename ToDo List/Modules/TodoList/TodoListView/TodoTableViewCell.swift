@@ -50,6 +50,7 @@ final class TodoTableViewCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         backgroundColor = .clear
+        
         setupView()
         completedButton.addTarget(self, action: #selector(completedButtonTapped), for: .touchUpInside)
     }

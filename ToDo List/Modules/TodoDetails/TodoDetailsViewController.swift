@@ -40,7 +40,7 @@ final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol
     private let dateLabel: UILabel = {
         let label = UILabel()
         label.textColor = .gray
-        label.font = UIFont.systemFont(ofSize: 12)
+        label.font = UIFont.systemFont(ofSize: 14)
         label.textAlignment = .center
         return label
     }()

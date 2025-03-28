@@ -20,7 +20,7 @@ final class TodoDetailsPresenter: TodoDetailsPresenterProtocol {
             interactor?.handleEditTodo(id: todo.id,
                                        newTitle: title,
                                        newDescription: description,
-                                       oldTitle: todo.title,
+                                       oldTitle: todo.title ?? "",
                                        oldDescription: todo.description ?? "")
         case .creating:
             interactor?.handleCreateTodo(title: title, description: description)

@@ -38,7 +38,8 @@ final class TodoListInteractor: TodoListInteractorProtocol {
         if searchText.isEmpty {
             presenter?.updateTodosList(with: .success(allTodos))
         } else {
-            let filteredTodos = allTodos.filter { $0.title.lowercased().contains(searchText.lowercased()) }
+            
+            let filteredTodos = allTodos.filter { ($0.title ?? "").lowercased().contains(searchText.lowercased()) }
             presenter?.updateTodosList(with: .success(filteredTodos))
         }
     }
