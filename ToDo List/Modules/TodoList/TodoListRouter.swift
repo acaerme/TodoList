@@ -1,5 +1,7 @@
 import UIKit
 
+// MARK: - TodoListRouter
+
 final class TodoListRouter: TodoListRouterProtocol {
     
     // MARK: - Properties
@@ -35,5 +37,10 @@ final class TodoListRouter: TodoListRouterProtocol {
     func presentTodoDetailsVC(todo: Todo?) {
         let todoDetailsViewController = TodoDetailsRouter.createModule(with: todo)
         viewController?.navigationController?.pushViewController(todoDetailsViewController, animated: true)
+    }
+    
+    func presentShareSheet(todoTitle: String) {
+        let activityViewController = UIActivityViewController(activityItems: [todoTitle], applicationActivities: nil)
+        viewController?.present(activityViewController, animated: true)
     }
 }

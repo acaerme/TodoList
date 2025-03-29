@@ -1,9 +1,15 @@
 import UIKit
 import SnapKit
 
+// MARK: - TodoPreviewController
+
 final class TodoPreviewController: UIViewController {
     
+    // MARK: - Properties
+    
     private let todo: Todo
+    
+    // MARK: - UI Elements
     
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -29,6 +35,8 @@ final class TodoPreviewController: UIViewController {
         return label
     }()
     
+    // MARK: - Initializers
+    
     init(todo: Todo) {
         self.todo = todo
         super.init(nibName: nil, bundle: nil)
@@ -38,12 +46,32 @@ final class TodoPreviewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = UIColor(hex: "272729")
+        configureView()
         setupLabels()
         setupLayout()
     }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        let targetSize = CGSize(width: view.bounds.width, height: UIView.layoutFittingCompressedSize.height)
+        preferredContentSize = view.systemLayoutSizeFitting(
+            targetSize,
+            withHorizontalFittingPriority: .required,
+            verticalFittingPriority: .fittingSizeLevel
+        )
+    }
+    
+    // MARK: - Configuration
+    
+    private func configureView() {
+        view.backgroundColor = UIColor(hex: "272729")
+    }
+    
+    // MARK: - Setup
     
     private func setupLabels() {
         if let titleText = todo.title, !titleText.isEmpty {
@@ -59,19 +87,28 @@ final class TodoPreviewController: UIViewController {
         dateLabel.text = formatter.string(from: todo.date)
     }
     
+    // MARK: - Layout
+    
     private func setupLayout() {
+        addSubviews()
+        setupConstraints()
+    }
+    
+    private func addSubviews() {
         view.addSubview(titleLabel)
         view.addSubview(descriptionLabel)
         view.addSubview(dateLabel)
-        
-        titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide).offset(16)
-            make.left.right.equalToSuperview().inset(16)
+    }
+    
+    private func setupConstraints() {
+        titleLabel.snp.makeConstraints { maker in
+            maker.top.equalTo(view.safeAreaLayoutGuide).offset(16)
+            maker.left.right.equalToSuperview().inset(16)
         }
         
-        descriptionLabel.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(12)
-            make.left.right.equalToSuperview().inset(16)
+        descriptionLabel.snp.makeConstraints { maker in
+            maker.top.equalTo(titleLabel.snp.bottom).offset(12)
+            maker.left.right.equalToSuperview().inset(16)
         }
         
         dateLabel.snp.makeConstraints { maker in
@@ -79,15 +116,5 @@ final class TodoPreviewController: UIViewController {
             maker.left.right.equalToSuperview().inset(16)
             maker.bottom.equalTo(view.safeAreaLayoutGuide).inset(16)
         }
-    }
-    
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        let targetSize = CGSize(width: view.bounds.width, height: UIView.layoutFittingCompressedSize.height)
-        preferredContentSize = view.systemLayoutSizeFitting(
-            targetSize,
-            withHorizontalFittingPriority: .required,
-            verticalFittingPriority: .fittingSizeLevel
-        )
     }
 }

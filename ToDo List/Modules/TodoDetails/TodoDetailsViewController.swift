@@ -7,39 +7,37 @@ enum TodoDetailsMode {
 }
 
 final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol {
-    
-    // MARK: - Properties
-    
+        
     var presenter: TodoDetailsPresenterProtocol?
     private var todo: Todo?
     private var mode: TodoDetailsMode
-    
-    // MARK: - UI Components
-    
+        
     private let scrollView: UIScrollView = {
         let scroll = UIScrollView()
         scroll.alwaysBounceVertical = true
+        scroll.backgroundColor = .systemBackground
         return scroll
     }()
     
     private let contentView: UIView = {
         let view = UIView()
+        view.backgroundColor = .systemBackground
         return view
     }()
     
     private let titleTextField: UITextField = {
         let textField = UITextField()
-        textField.textColor = .white
+        textField.textColor = .label
         textField.font = UIFont.boldSystemFont(ofSize: 24)
         textField.textAlignment = .left
-        textField.backgroundColor = .clear
+        textField.backgroundColor = .systemBackground
         textField.returnKeyType = .done
         return textField
     }()
     
     private let dateLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .gray
+        label.textColor = .secondaryLabel
         label.font = UIFont.systemFont(ofSize: 14)
         label.textAlignment = .center
         return label
@@ -47,24 +45,21 @@ final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol
     
     private let descriptionTextView: UITextView = {
         let textView = UITextView()
-        textView.textColor = .white
+        textView.textColor = .label
         textView.font = UIFont.systemFont(ofSize: 16)
-        textView.backgroundColor = .clear
+        textView.backgroundColor = .systemBackground
         textView.layer.cornerRadius = 12
         textView.isEditable = true
         textView.isScrollEnabled = false
         return textView
     }()
-    
-    // MARK: - Initializers
-    
-    init(todo: Todo? = nil) {
+        
+    init(todo: Todo?) {
         if let todo = todo {
             self.todo = todo
             self.mode = .editing
         } else {
             self.mode = .creating
-            // Auto-focusing will be handled in viewDidAppear.
         }
         super.init(nibName: nil, bundle: nil)
     }
@@ -72,14 +67,12 @@ final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    // MARK: - Lifecycle Methods
-    
+        
     override func viewDidLoad() {
         super.viewDidLoad()
         configureView()
         configureTextField()
-        setupUIComponents()
+        setupLayout()
         setupGesture()
         configureContent()
     }
@@ -98,11 +91,9 @@ final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol
                               mode: mode,
                               todo: todo)
     }
-    
-    // MARK: - UI Setup Methods
-    
+        
     private func configureView() {
-        view.backgroundColor = .black
+        view.backgroundColor = .systemBackground
         navigationController?.navigationBar.tintColor = .systemYellow
         navigationItem.largeTitleDisplayMode = .never
     }
@@ -111,7 +102,7 @@ final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol
         titleTextField.delegate = self
     }
     
-    private func setupUIComponents() {
+    private func setupLayout() {
         setupScrollView()
         addSubviews()
         setupConstraints()
@@ -164,7 +155,7 @@ final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol
     private func configureContent() {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd/MM/yyyy"
-        dateLabel.text = formatter.string(from: Date())
+        dateLabel.text = formatter.string(from: todo?.date ?? Date()) // later
         
         if let todo = todo {
             titleTextField.text = todo.title

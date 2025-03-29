@@ -1,21 +1,23 @@
 import Foundation
 
+// MARK: - TodoListInteractor
+
 final class TodoListInteractor: TodoListInteractorProtocol {
-    
+
     // MARK: - Properties
-    
+
     private let networkManager: NetworkManagerProtocol
     private var allTodos: [Todo] = []
     weak var presenter: TodoListPresenterProtocol?
-    
-    // MARK: - Initialization
-    
+
+    // MARK: - Initializers
+
     init(networkManager: NetworkManagerProtocol) {
         self.networkManager = networkManager
     }
-    
-    // MARK: - Data Methods
-    
+
+    // MARK: - Data Fetching
+
     func fetchTodos() {
         Task {
             do {
@@ -33,38 +35,40 @@ final class TodoListInteractor: TodoListInteractorProtocol {
             }
         }
     }
-    
+
+    // MARK: - Data Filtering
+
     func filterTodos(with searchText: String) {
         if searchText.isEmpty {
             presenter?.updateTodosList(with: .success(allTodos))
         } else {
-            
             let filteredTodos = allTodos.filter { ($0.title ?? "").lowercased().contains(searchText.lowercased()) }
             presenter?.updateTodosList(with: .success(filteredTodos))
         }
     }
-    
+
+    // MARK: - Data Manipulation
+
     func toggleTodoCompletion(for updatedTodo: Todo) {
         if let index = allTodos.firstIndex(where: { $0.id == updatedTodo.id }) {
             allTodos[index].completed.toggle()
         }
         presenter?.updateTodosList(with: .success(allTodos))
     }
-    
+
     func addOrUpdate(todo: Todo) {
-            if let index = allTodos.firstIndex(where: { $0.id == todo.id }) {
-                allTodos[index] = todo
-            } else {
-                allTodos.insert(todo, at: 0)
-            }
-            presenter?.updateTodosList(with: .success(allTodos))
+        if let index = allTodos.firstIndex(where: { $0.id == todo.id }) {
+            allTodos[index] = todo
+        } else {
+            allTodos.insert(todo, at: 0)
+        }
+        presenter?.updateTodosList(with: .success(allTodos))
     }
-    
+
     func delete(id: UUID) {
         if let index = allTodos.firstIndex(where: { $0.id == id }) {
             allTodos.remove(at: index)
         }
-
         presenter?.updateTodosList(with: .success(allTodos))
     }
 }

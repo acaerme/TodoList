@@ -1,10 +1,12 @@
 import Foundation
+import UIKit
 
 // MARK: - TodoListViewProtocol
 
 protocol TodoListViewProtocol: AnyObject {
     var presenter: TodoListPresenterProtocol? { get set }
     func update(with todos: [Todo])
+    func enterNoTodosState()
 }
 
 // MARK: - TodoListInteractorProtocol
@@ -33,6 +35,9 @@ protocol TodoListPresenterProtocol: AnyObject {
     func searchForTodos(with searchText: String)
     func editButtonTapped(todo: Todo?)
     func deleteButtonTapped(todo: Todo?)
+    func shareButtonTapped(todo: Todo)
+    func getTaskCountText(for count: Int) -> String
+    func contextMenuConfiguration(for todo: Todo, at indexPath: IndexPath) -> UIContextMenuConfiguration
 }
 
 // MARK: - TodoListRouterProtocol
@@ -42,4 +47,5 @@ protocol TodoListRouterProtocol: AnyObject {
     static func createModule() -> TodoListViewController
     func showDetails(for todo: Todo)
     func presentTodoDetailsVC(todo: Todo?)
+    func presentShareSheet(todoTitle: String)
 }
