@@ -11,23 +11,6 @@ final class TodoListPresenter: TodoListPresenterProtocol {
     var interactor: TodoListInteractorProtocol?
     var router: TodoListRouterProtocol?
 
-    // MARK: - Initialization
-
-    init() {
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(todoAddedorUpdated(_:)),
-                                               name: NSNotification.Name("TodoAddedOrUpdated"),
-                                               object: nil)
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(todoDeleted(_:)),
-                                               name: NSNotification.Name("TodoDeleted"),
-                                               object: nil)
-    }
-
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
-
     // MARK: - TodoListPresenterProtocol Methods
 
     func viewDidLoad() {
@@ -120,17 +103,5 @@ final class TodoListPresenter: TodoListPresenterProtocol {
 
             return UIMenu(title: "", children: [edit, share, delete])
         }
-    }
-
-    // MARK: - Notification Handlers
-
-    @objc private func todoAddedorUpdated(_ notification: Notification) {
-        guard let newTodo = notification.userInfo?["todo"] as? Todo else { return }
-        interactor?.addOrUpdate(todo: newTodo)
-    }
-
-    @objc private func todoDeleted(_ notification: Notification) {
-        guard let todoId = notification.userInfo?["todoId"] as? UUID else { return }
-        interactor?.delete(id: todoId)
     }
 }

@@ -1,17 +1,14 @@
 import UIKit
 import SnapKit
 
-enum TodoDetailsMode {
-    case creating
-    case editing
-}
-
-final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol {
-        
+final class TodoDetailsViewController: UIViewController {
+    
+    // MARK: - Properties
+    
     var presenter: TodoDetailsPresenterProtocol?
-    private var todo: Todo?
-    private var mode: TodoDetailsMode
-        
+    
+    // MARK: - UI Elements
+    
     private let scrollView: UIScrollView = {
         let scroll = UIScrollView()
         scroll.alwaysBounceVertical = true
@@ -53,45 +50,26 @@ final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol
         textView.isScrollEnabled = false
         return textView
     }()
-        
-    init(todo: Todo?) {
-        if let todo = todo {
-            self.todo = todo
-            self.mode = .editing
-        } else {
-            self.mode = .creating
-        }
-        super.init(nibName: nil, bundle: nil)
-    }
     
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-        
+    // MARK: - Life Cycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configureView()
         configureTextField()
         setupLayout()
         setupGesture()
-        configureContent()
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        if mode == .creating {
-            titleTextField.becomeFirstResponder()
-        }
+        presenter?.viewDidLoad()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         presenter?.handleTodo(title: titleTextField.text,
-                              description: descriptionTextView.text,
-                              mode: mode,
-                              todo: todo)
+                              description: descriptionTextView.text)
     }
-        
+    
+    // MARK: - Configurations
+    
     private func configureView() {
         view.backgroundColor = .systemBackground
         navigationController?.navigationBar.tintColor = .systemYellow
@@ -101,6 +79,8 @@ final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol
     private func configureTextField() {
         titleTextField.delegate = self
     }
+    
+    // MARK: - Setup Layout
     
     private func setupLayout() {
         setupScrollView()
@@ -147,31 +127,32 @@ final class TodoDetailsViewController: UIViewController, TodoDetailsViewProtocol
         }
     }
     
+    // MARK: - Actions
+    
     private func setupGesture() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tapGesture)
     }
     
-    private func configureContent() {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "dd/MM/yyyy"
-        dateLabel.text = formatter.string(from: todo?.date ?? Date()) // later
-        
-        if let todo = todo {
-            titleTextField.text = todo.title
-            descriptionTextView.text = todo.description ?? ""
-        } else {
-            titleTextField.text = ""
-            descriptionTextView.text = ""
-        }
-    }
-    
-    // MARK: - Actions
-    
     @objc private func dismissKeyboard() {
         view.endEditing(true)
     }
 }
+
+// MARK: - TodoDetailsViewProtocol
+
+extension TodoDetailsViewController: TodoDetailsViewProtocol {
+    func makeTitleTextFieldFirstResponder() {
+        titleTextField.becomeFirstResponder()
+    }
+    
+    func configureContent(date: String, title: String, description: String) {
+        dateLabel.text = date
+        titleTextField.text = title
+        descriptionTextView.text = description
+    }
+}
+
 // MARK: - UITextFieldDelegate
 
 extension TodoDetailsViewController: UITextFieldDelegate {

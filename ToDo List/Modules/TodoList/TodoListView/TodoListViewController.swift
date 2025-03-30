@@ -74,6 +74,7 @@ final class TodoListViewController: UIViewController {
         newTodoButton.addTarget(self, action: #selector(newTodoButtonTapped), for: .touchUpInside)
     }
     
+    // later
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
         if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {

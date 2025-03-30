@@ -4,6 +4,8 @@ import Foundation
 
 protocol TodoDetailsViewProtocol: AnyObject {
     var presenter: TodoDetailsPresenterProtocol? { get set }
+    func makeTitleTextFieldFirstResponder()
+    func configureContent(date: String, title: String, description: String)
 }
 
 // MARK: - TodoDetailsInteractorProtocol
@@ -12,7 +14,7 @@ protocol TodoDetailsInteractorProtocol: AnyObject {
     var presenter: TodoDetailsPresenterProtocol? { get set }
     func handleCreateTodo(title: String, description: String)
     func handleEditTodo(id: UUID, newTitle: String, newDescription: String,
-                        oldTitle: String, oldDescription: String)
+                        oldTitle: String, oldDescription: String, completed: Bool)
 }
 
 // MARK: - TodoDetailsPresenterProtocol
@@ -22,7 +24,8 @@ protocol TodoDetailsPresenterProtocol: AnyObject {
     var interactor: TodoDetailsInteractorProtocol? { get set }
     var router: TodoDetailsRouterProtocol? { get set }
     
-    func handleTodo(title: String?, description: String?, mode: TodoDetailsMode, todo: Todo?)
+    func viewDidLoad()
+    func handleTodo(title: String?, description: String?)
     func finishedHandlingTodo()
 }
 

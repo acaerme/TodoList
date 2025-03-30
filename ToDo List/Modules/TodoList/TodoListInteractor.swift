@@ -11,9 +11,22 @@ final class TodoListInteractor: TodoListInteractorProtocol {
     weak var presenter: TodoListPresenterProtocol?
 
     // MARK: - Initializers
-
+    
     init(networkManager: NetworkManagerProtocol) {
         self.networkManager = networkManager
+        
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(todoAddedorUpdated(_:)),
+                                               name: NSNotification.Name("TodoAddedOrUpdated"),
+                                               object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(todoDeleted(_:)),
+                                               name: NSNotification.Name("TodoDeleted"),
+                                               object: nil)
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 
     // MARK: - Data Fetching
@@ -70,5 +83,17 @@ final class TodoListInteractor: TodoListInteractorProtocol {
             allTodos.remove(at: index)
         }
         presenter?.updateTodosList(with: .success(allTodos))
+    }
+    
+    // MARK: - Notification Handlers
+
+    @objc private func todoAddedorUpdated(_ notification: Notification) {
+        guard let newTodo = notification.userInfo?["todo"] as? Todo else { return }
+        addOrUpdate(todo: newTodo)
+    }
+
+    @objc private func todoDeleted(_ notification: Notification) {
+        guard let todoId = notification.userInfo?["todoId"] as? UUID else { return }
+        delete(id: todoId)
     }
 }

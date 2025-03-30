@@ -120,12 +120,14 @@ final class TodoTableViewCell: UITableViewCell {
     // MARK: - UI Updates
 
     private func updateCompletionUI(with completed: Bool) {
-        let title = todo?.title ?? ""
-        let attributedText = NSMutableAttributedString(string: title)
+        let titleText = todo?.title?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let displayTitle = titleText.isEmpty ? todo?.description ?? "" : titleText
+
+        let attributedText = NSMutableAttributedString(string: displayTitle)
         if completed {
             attributedText.addAttribute(NSAttributedString.Key.strikethroughStyle,
                                         value: NSUnderlineStyle.single.rawValue,
-                                        range: NSRange(location: 0, length: title.count))
+                                        range: NSRange(location: 0, length: displayTitle.count))
         }
         titleLabel.attributedText = attributedText
 
