@@ -68,7 +68,7 @@ final class TodoPreviewController: UIViewController {
     // MARK: - Configuration
     
     private func configureView() {
-        view.backgroundColor = UIColor(hex: "272729")
+        view.backgroundColor = UIColor.previewVCBackgroundColor
     }
     
     // MARK: - Setup

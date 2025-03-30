@@ -1,7 +1,14 @@
 import UIKit
 
+// MARK: - UIColor Extension
+
 extension UIColor {
+    // MARK: - Static Properties
+
+    static let previewVCBackgroundColor = UIColor(hex: "#272729")
     
+    // MARK: - Initializers
+
     convenience init?(hex: String) {
         var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         if hexSanitized.hasPrefix("#") {

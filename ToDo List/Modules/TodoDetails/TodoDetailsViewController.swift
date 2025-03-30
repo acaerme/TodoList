@@ -47,7 +47,7 @@ final class TodoDetailsViewController: UIViewController {
         textView.backgroundColor = .systemBackground
         textView.layer.cornerRadius = 12
         textView.isEditable = true
-        textView.isScrollEnabled = false
+        textView.isScrollEnabled = true
         return textView
     }()
     

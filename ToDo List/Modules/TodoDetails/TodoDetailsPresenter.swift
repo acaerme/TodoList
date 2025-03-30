@@ -72,7 +72,7 @@ final class TodoDetailsPresenter: TodoDetailsPresenterProtocol {
     private func getFormattedDate() -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "dd/MM/yyyy"
-        return formatter.string(from: todo?.date ?? Date()) // later
+        return formatter.string(from: todo?.date ?? Date()) 
     }
     
     private func getTitleText() -> String {
