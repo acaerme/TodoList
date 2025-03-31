@@ -27,7 +27,8 @@ final class TodoListPresenter: TodoListPresenterProtocol {
             }
 
         case .failure(let error):
-            print("Error fetching todos: \(error)")
+            // later handle error
+            print("Error fetching todos")
         }
     }
 
@@ -40,7 +41,7 @@ final class TodoListPresenter: TodoListPresenterProtocol {
     }
 
     func toggleTodoCompletion(for updatedTodo: Todo) {
-        interactor?.toggleTodoCompletion(for: updatedTodo)
+        interactor?.updateTodo(updatedTodo: updatedTodo)
     }
 
     func searchForTodos(with searchText: String) {
@@ -58,6 +59,10 @@ final class TodoListPresenter: TodoListPresenterProtocol {
 
         interactor?.delete(id: todo.id)
     }
+    
+    func deleteAllTodosButtonTapped() {
+        interactor?.deleteAllTodos()
+    }
 
     func shareButtonTapped(todo: Todo) {
         let title = todo.title ?? ""
@@ -68,21 +73,6 @@ final class TodoListPresenter: TodoListPresenterProtocol {
     func getTaskCountText(for count: Int) -> String {
         let word = getTaskWord(for: count)
         return "\(count) \(word)"
-    }
-
-    private func getTaskWord(for count: Int) -> String {
-        let rem100 = count % 100
-        let rem10 = count % 10
-
-        if rem100 >= 11 && rem100 <= 14 {
-            return "задач"
-        } else if rem10 == 1 {
-            return "задача"
-        } else if rem10 >= 2 && rem10 <= 4 {
-            return "задачи"
-        } else {
-            return "задач"
-        }
     }
 
     func contextMenuConfiguration(for todo: Todo, at indexPath: IndexPath) -> UIContextMenuConfiguration {
@@ -102,6 +92,21 @@ final class TodoListPresenter: TodoListPresenterProtocol {
             }
 
             return UIMenu(title: "", children: [edit, share, delete])
+        }
+    }
+    
+    private func getTaskWord(for count: Int) -> String {
+        let rem100 = count % 100
+        let rem10 = count % 10
+
+        if rem100 >= 11 && rem100 <= 14 {
+            return "задач"
+        } else if rem10 == 1 {
+            return "задача"
+        } else if rem10 >= 2 && rem10 <= 4 {
+            return "задачи"
+        } else {
+            return "задач"
         }
     }
 }

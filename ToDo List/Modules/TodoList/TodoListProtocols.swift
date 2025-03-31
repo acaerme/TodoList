@@ -15,9 +15,9 @@ protocol TodoListInteractorProtocol: AnyObject {
     var presenter: TodoListPresenterProtocol? { get set }
     func fetchTodos()
     func filterTodos(with searchText: String)
-    func toggleTodoCompletion(for updatedTodo: Todo)
-    func addOrUpdate(todo: Todo)
+    func updateTodo(updatedTodo: Todo)
     func delete(id: UUID)
+    func deleteAllTodos()
 }
 
 // MARK: - TodoListPresenterProtocol
@@ -36,6 +36,7 @@ protocol TodoListPresenterProtocol: AnyObject {
     func editButtonTapped(todo: Todo?)
     func deleteButtonTapped(todo: Todo?)
     func shareButtonTapped(todo: Todo)
+    func deleteAllTodosButtonTapped()
     func getTaskCountText(for count: Int) -> String
     func contextMenuConfiguration(for todo: Todo, at indexPath: IndexPath) -> UIContextMenuConfiguration
 }

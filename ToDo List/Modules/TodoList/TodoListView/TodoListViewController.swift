@@ -45,6 +45,13 @@ final class TodoListViewController: UIViewController {
         return button
     }()
     
+    private let deleteAllTodosButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "trash"), for: .normal)
+        button.tintColor = .systemYellow
+        return button
+    }()
+    
     private let noTodosLabel: UILabel = {
         let label = UILabel()
         label.text = "No Todos"
@@ -70,8 +77,8 @@ final class TodoListViewController: UIViewController {
         setupNavigationBar()
         setupSearchController()
         setupTableView()
+        setupActions()
         presenter?.viewDidLoad()
-        newTodoButton.addTarget(self, action: #selector(newTodoButtonTapped), for: .touchUpInside)
     }
     
     // later
@@ -101,6 +108,7 @@ final class TodoListViewController: UIViewController {
         view.addSubview(bottomTabBar)
         bottomTabBar.addSubview(taskCountLabel)
         bottomTabBar.addSubview(newTodoButton)
+        bottomTabBar.addSubview(deleteAllTodosButton)
         view.addSubview(noTodosIcon)
         view.addSubview(noTodosLabel)
     }
@@ -124,6 +132,11 @@ final class TodoListViewController: UIViewController {
         newTodoButton.snp.makeConstraints { maker in
             maker.top.equalToSuperview().offset(16)
             maker.right.equalToSuperview().inset(20)
+        }
+        
+        deleteAllTodosButton.snp.makeConstraints { maker in
+            maker.top.equalToSuperview().offset(16)
+            maker.left.equalToSuperview().inset(20)
         }
         
         noTodosIcon.snp.makeConstraints { maker in
@@ -190,12 +203,19 @@ final class TodoListViewController: UIViewController {
     
     // MARK: - Actions
     
+    private func setupActions() {
+        newTodoButton.addTarget(self, action: #selector(newTodoButtonTapped), for: .touchUpInside)
+        deleteAllTodosButton.addTarget(self, action: #selector(deleteAllTodosButtonTapped), for: .touchUpInside)
+    }
+    
     @objc private func newTodoButtonTapped() {
         presenter?.newTodoButtonTapped()
     }
     
-    private func shareTodo(todo: Todo) {
-        presenter?.shareButtonTapped(todo: todo)
+    @objc private func deleteAllTodosButtonTapped() {
+        
+        // later with alert
+        presenter?.deleteAllTodosButtonTapped()
     }
     
     // MARK: - UI Updates
@@ -227,23 +247,21 @@ extension TodoListViewController: TodoListViewProtocol {
         let taskCountText = presenter?.getTaskCountText(for: todos.count)
         
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.noTodosLabel.isHidden = true
-            self.noTodosIcon.isHidden = true
-            self.todoTableView.isHidden = false
-            self.taskCountLabel.isHidden = false
-            self.taskCountLabel.text = taskCountText
-            self.todoTableView.reloadData()
+            self?.noTodosLabel.isHidden = true
+            self?.noTodosIcon.isHidden = true
+            self?.todoTableView.isHidden = false
+            self?.taskCountLabel.isHidden = false
+            self?.taskCountLabel.text = taskCountText
+            self?.todoTableView.reloadData()
         }
     }
     
     func enterNoTodosState() {
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.noTodosLabel.isHidden = false
-            self.noTodosIcon.isHidden = false
-            self.todoTableView.isHidden = true
-            self.taskCountLabel.isHidden = true
+            self?.noTodosLabel.isHidden = false
+            self?.noTodosIcon.isHidden = false
+            self?.todoTableView.isHidden = true
+            self?.taskCountLabel.isHidden = true
         }
     }
 }

@@ -17,10 +17,6 @@ final class TodoDetailsPresenter: TodoDetailsPresenterProtocol {
     private var todo: Todo?
     private var mode: TodoDetailsMode
     
-    var isCreating: Bool {
-        return mode == .creating
-    }
-    
     // MARK: - Initializers
     
     init(todo: Todo?) {
@@ -40,7 +36,7 @@ final class TodoDetailsPresenter: TodoDetailsPresenterProtocol {
         let description = getDescriptionText()
         view?.configureContent(date: date, title: title, description: description)
         
-        if mode == .creating {
+        if title.isEmpty {
             view?.makeTitleTextFieldFirstResponder()
         }
     }
