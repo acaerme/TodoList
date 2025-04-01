@@ -30,7 +30,6 @@ final class TodoListPresenter: TodoListPresenterProtocol {
     func updateTodosList(with result: Result<[Todo], Error>) {
         switch result {
         case .success(let todos):
-            print(todos.count)
             let viewModel = TodoListViewModel(
                 todos: todos,
                 taskCountText: self.getTaskCountText(for: todos.count),
@@ -59,7 +58,9 @@ final class TodoListPresenter: TodoListPresenterProtocol {
         router?.presentTodoDetailsVC(todo: nil)
     }
     
-    func toggleTodoCompletion(for updatedTodo: Todo) {
+    func toggleTodo(todo: Todo) {
+        var updatedTodo = todo
+        updatedTodo.completed.toggle()
         interactor?.updateTodo(updatedTodo: updatedTodo)
     }
     
@@ -82,7 +83,6 @@ final class TodoListPresenter: TodoListPresenterProtocol {
     }
     
     func deleteAllTodosButtonTapped() {
-        print("CALLLLLL")
         let alert = setupAlert(title: "Delete all todos",
                                message: "Are you sure that you want to delete all todos? This action can not be undone.")
         

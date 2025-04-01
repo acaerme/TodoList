@@ -213,7 +213,6 @@ class TodoListViewController: UIViewController {
 
 extension TodoListViewController: TodoListViewProtocol {
     func update(with viewModel: TodoListViewModel) {
-        print(viewModel.todos)
         DispatchQueue.main.async { [weak self] in
             self?.todos = viewModel.todos
             self?.noTodosLabel.isHidden = viewModel.isNoTodosHidden
@@ -240,7 +239,12 @@ extension TodoListViewController: UITableViewDataSource, UITableViewDelegate {
         
         let todo = todos[indexPath.row]
         cell.configure(with: todo)
-        cell.delegate = self
+        cell.selectCompletion = { [weak self] in
+            guard let self else { return }
+            
+            let todo = self.todos[indexPath.row]
+            self.presenter?.toggleTodo(todo: todo)
+        }
         cell.selectionStyle = .none
         return cell
     }
@@ -258,13 +262,6 @@ extension TodoListViewController: UITableViewDataSource, UITableViewDelegate {
     
 }
 
-// MARK: - TodoTableViewCellDelegate
-
-extension TodoListViewController: TodoTableViewCellDelegate {
-    func didToggleTodo(_ updatedTodo: Todo) {
-        presenter?.toggleTodoCompletion(for: updatedTodo)
-    }
-}
 
 // MARK: - UISearchResultsUpdating
 

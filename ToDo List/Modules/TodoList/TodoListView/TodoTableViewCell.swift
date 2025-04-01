@@ -15,6 +15,7 @@ final class TodoTableViewCell: UITableViewCell {
 
     private var todo: Todo?
     weak var delegate: TodoTableViewCellDelegate?
+    var selectCompletion: (() -> Void)?
 
     // MARK: - UI Elements
 
@@ -151,9 +152,6 @@ final class TodoTableViewCell: UITableViewCell {
     // MARK: - Actions
 
     @objc private func completedButtonTapped() {
-        guard var todo = todo else { return }
-        todo.completed.toggle()
-        updateCompletionUI(with: todo.completed)
-        delegate?.didToggleTodo(todo)
+        selectCompletion?()
     }
 }

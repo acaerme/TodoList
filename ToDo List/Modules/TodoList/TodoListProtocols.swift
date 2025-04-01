@@ -31,7 +31,7 @@ protocol TodoListPresenterProtocol: AnyObject {
     func updateTodosList(with result: Result<[Todo], Error>)
     func didSelectTodo(todo: Todo)
     func newTodoButtonTapped()
-    func toggleTodoCompletion(for updatedTodo: Todo)
+    func toggleTodo(todo: Todo)
     func searchForTodos(with searchText: String)
     func editButtonTapped(todo: Todo?)
     func deleteButtonTapped(todo: Todo?)

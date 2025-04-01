@@ -8,6 +8,7 @@ final class TodoListInteractor: TodoListInteractorProtocol {
     private let coreDataManager: CoreDataManager
     private var allTodos: [Todo] = []
     weak var presenter: TodoListPresenterProtocol?
+    private var currentSearchText: String = ""
     
     init(networkManager: NetworkManagerProtocol, coreDataManager: CoreDataManager) {
         self.networkManager = networkManager
@@ -52,7 +53,10 @@ final class TodoListInteractor: TodoListInteractorProtocol {
                 allTodos.insert(updatedTodo, at: 0)
             }
             //later
-            presenter?.updateTodosList(with: .success(allTodos))
+            
+            filterTodos(with: currentSearchText) { filteredTodos in
+                self.presenter?.updateTodosList(with: .success(filteredTodos))
+            }
         }
     }
     
@@ -64,7 +68,6 @@ final class TodoListInteractor: TodoListInteractorProtocol {
     }
     
     private func reflectAllTodosDeleted() {
-        print("calleddddd")
         allTodos.removeAll()
         presenter?.updateTodosList(with: .success(self.allTodos))
     }
@@ -129,6 +132,8 @@ final class TodoListInteractor: TodoListInteractorProtocol {
         }
     
     func filterTodos(with searchText: String, completion: @escaping (([Todo]) -> Void)) {
+        currentSearchText = searchText
+        
         guard !searchText.isEmpty else {
             completion(allTodos)
             return
@@ -171,17 +176,12 @@ final class TodoListInteractor: TodoListInteractorProtocol {
     }
     
     func deleteAllTodos() {
-        print("udalyau")
         coreDataManager.deleteAllTodos { [weak self] error in
-            print(1)
             guard error == nil else {
-                print("oshibka")
                 self?.presenter?.presentStandardErrorAlert()
                 return
             }
-            print(2)
-            print("tut")
-            print(self)
+            
             self?.reflectAllTodosDeleted()
         }
     }
