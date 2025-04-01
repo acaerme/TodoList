@@ -59,10 +59,6 @@ final class TodoDetailsPresenter: TodoDetailsPresenterProtocol {
         }
     }
     
-    func finishedHandlingTodo() {
-        router?.dismissVC()
-    }
-    
     // MARK: - Private Methods
     
     private func getFormattedDate() -> String {

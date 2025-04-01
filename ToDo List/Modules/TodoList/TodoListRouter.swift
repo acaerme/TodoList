@@ -2,7 +2,7 @@ import UIKit
 
 // MARK: - TodoListRouter
 
-final class TodoListRouter: TodoListRouterProtocol {
+final class TodoListRouter: TodoListRouterProtocol {    
     
     // MARK: - Properties
     
@@ -12,7 +12,10 @@ final class TodoListRouter: TodoListRouterProtocol {
     
     static func createModule() -> TodoListViewController {
         let view = TodoListViewController()
-        let interactor = TodoListInteractor(networkManager: DependencyContainer.shared.container.resolve(NetworkManagerProtocol.self)!)
+        let interactor = TodoListInteractor(
+            networkManager: DependencyContainer.shared.container.resolve(NetworkManagerProtocol.self)!,
+            coreDataManager: DependencyContainer.shared.container.resolve(CoreDataManager.self)!
+        )
         let presenter = TodoListPresenter()
         let router = TodoListRouter()
         
@@ -29,11 +32,6 @@ final class TodoListRouter: TodoListRouterProtocol {
         return view
     }
     
-    func showDetails(for todo: Todo) {
-        let detailsViewController = TodoDetailsRouter.createModule(with: todo)
-        viewController?.navigationController?.pushViewController(detailsViewController, animated: true)
-    }
-    
     func presentTodoDetailsVC(todo: Todo?) {
         let todoDetailsViewController = TodoDetailsRouter.createModule(with: todo)
         viewController?.navigationController?.pushViewController(todoDetailsViewController, animated: true)
@@ -42,5 +40,13 @@ final class TodoListRouter: TodoListRouterProtocol {
     func presentShareSheet(todoTitle: String) {
         let activityViewController = UIActivityViewController(activityItems: [todoTitle], applicationActivities: nil)
         viewController?.present(activityViewController, animated: true)
+    }
+    
+    func presentErrorAlert(alert: UIAlertController) {
+        viewController?.present(alert, animated: true)
+    }
+    
+    func presentDeleteAllTodosAlert(alert: UIAlertController) {
+        viewController?.present(alert, animated: true)
     }
 }

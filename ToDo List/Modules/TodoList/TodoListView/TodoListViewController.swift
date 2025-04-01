@@ -3,7 +3,7 @@ import SnapKit
 
 // MARK: - TodoListViewController
 
-final class TodoListViewController: UIViewController {
+class TodoListViewController: UIViewController {
     
     // MARK: - Properties
     
@@ -79,14 +79,6 @@ final class TodoListViewController: UIViewController {
         setupTableView()
         setupActions()
         presenter?.viewDidLoad()
-    }
-    
-    // later
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        if traitCollection.hasDifferentColorAppearance(comparedTo: previousTraitCollection) {
-            updateUIForColorScheme()
-        }
     }
     
     // MARK: - Configuration
@@ -171,6 +163,7 @@ final class TodoListViewController: UIViewController {
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.placeholder = "Search"
         searchController.searchBar.tintColor = .systemYellow
+        searchController.searchBar.delegate = self
         
         navigationItem.hidesSearchBarWhenScrolling = false
         navigationItem.searchController = searchController
@@ -184,7 +177,6 @@ final class TodoListViewController: UIViewController {
         leftImageView.tintColor = .lightGray
         searchController.searchBar.searchTextField.leftView = leftImageView
         
-        searchController.searchBar.delegate = self
         
         let searchTextField = searchController.searchBar.searchTextField
         searchTextField.backgroundColor = .systemGray6
@@ -213,55 +205,22 @@ final class TodoListViewController: UIViewController {
     }
     
     @objc private func deleteAllTodosButtonTapped() {
-        
-        // later with alert
         presenter?.deleteAllTodosButtonTapped()
-    }
-    
-    // MARK: - UI Updates
-    
-    private func updateUIForColorScheme() {
-        view.backgroundColor = .systemBackground
-        navigationController?.navigationBar.standardAppearance.backgroundColor = .systemBackground
-        navigationController?.navigationBar.scrollEdgeAppearance?.backgroundColor = .systemBackground
-        navigationController?.navigationBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.label]
-        navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.label]
-        taskCountLabel.textColor = .label
-        todoTableView.reloadData()
-        
-        if let searchTextField = searchController?.searchBar.searchTextField {
-            searchTextField.textColor = .label
-            searchTextField.backgroundColor = .systemGray6
-            searchTextField.attributedPlaceholder = NSAttributedString(string: "Search", attributes: [
-                .foregroundColor: UIColor.lightGray
-            ])
-        }
     }
 }
 
 // MARK: - TodoListViewProtocol
 
 extension TodoListViewController: TodoListViewProtocol {
-    func update(with todos: [Todo]) {
-        self.todos = todos
-        let taskCountText = presenter?.getTaskCountText(for: todos.count)
-        
+    func update(with viewModel: TodoListViewModel) {
         DispatchQueue.main.async { [weak self] in
-            self?.noTodosLabel.isHidden = true
-            self?.noTodosIcon.isHidden = true
-            self?.todoTableView.isHidden = false
-            self?.taskCountLabel.isHidden = false
-            self?.taskCountLabel.text = taskCountText
+            self?.todos = viewModel.todos
+            self?.noTodosLabel.isHidden = viewModel.isNoTodosHidden
+            self?.noTodosIcon.isHidden = viewModel.isNoTodosHidden
+            self?.todoTableView.isHidden = viewModel.isTableViewHidden
+            self?.taskCountLabel.isHidden = viewModel.isTaskCountLabelHidden
+            self?.taskCountLabel.text = viewModel.taskCountText
             self?.todoTableView.reloadData()
-        }
-    }
-    
-    func enterNoTodosState() {
-        DispatchQueue.main.async { [weak self] in
-            self?.noTodosLabel.isHidden = false
-            self?.noTodosIcon.isHidden = false
-            self?.todoTableView.isHidden = true
-            self?.taskCountLabel.isHidden = true
         }
     }
 }

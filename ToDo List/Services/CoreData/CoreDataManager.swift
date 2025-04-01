@@ -1,157 +1,207 @@
 import CoreData
 
 class CoreDataManager {
-    static let shared = CoreDataManager()
     
-    lazy var persistentContainer: NSPersistentContainer = {
-        let container = NSPersistentContainer(name: "TodoList")
-        container.loadPersistentStores(completionHandler: { (storeDescription, error) in
-            if let error = error as NSError? {
-                fatalError("Unresolved error \(error), \(error.userInfo)")
+    // MARK: - CoreData Stack
+    
+    let persistentContainer: NSPersistentContainer
+    private let backgroundQueue = DispatchQueue(label: "com.todolist.coredata", qos: .userInitiated)
+    
+    init(persistentContainer: NSPersistentContainer? = nil) {
+        if let container = persistentContainer {
+            self.persistentContainer = container
+        } else {
+            self.persistentContainer = NSPersistentContainer(name: "TodoList")
+            self.persistentContainer.loadPersistentStores { _, error in
+                if let error = error {
+                    fatalError("Failed to load persistent stores: \(error)")
+                }
             }
-        })
-        return container
-    }()
+        }
+    }
     
-    func saveContext () {
+    // MARK: - Core Data Saving support
+    
+    private func saveContext(completion: ((Error?) -> Void)? = nil) {
         let context = persistentContainer.viewContext
         if context.hasChanges {
             do {
                 try context.save()
+                completion?(nil)
             } catch {
                 let nserror = error as NSError
-                fatalError("Unresolved error \(nserror), \(nserror.userInfo)")
+                completion?(nserror)
             }
         }
     }
     
     // MARK: - CRUD Operations
     
-    func saveTodos(todos: [Todo]) {
-        let context = persistentContainer.viewContext
-        
-        for todo in todos {
-            let todoEntity = TodoEntity(context: context)
-            todoEntity.id = todo.id
-            todoEntity.todoTitle = todo.title
-            todoEntity.todoDescription = todo.description
-            todoEntity.date = todo.date
-            todoEntity.completed = todo.completed
-        }
-        
-        do {
-            try context.save()
-        } catch {
-            print("Failed to save todos: \(error)")
+    func saveTodos(todos: [Todo]?, completion: ((Error?) -> Void)? = nil) {
+        backgroundQueue.async { [weak self] in
+            guard let self = self else { return }
+            let context = self.persistentContainer.viewContext
+            
+            for todo in todos ?? [] {
+                let todoEntity = TodoEntity(context: context)
+                todoEntity.id = todo.id
+                todoEntity.todoTitle = todo.title
+                todoEntity.todoDescription = todo.description
+                todoEntity.date = todo.date
+                todoEntity.completed = todo.completed
+            }
+            
+            self.saveContext(completion: completion)
         }
     }
     
     func getAllTodos(completion: @escaping (Result<[Todo], Error>) -> Void) {
-        let fetchRequest: NSFetchRequest<TodoEntity> = TodoEntity.fetchRequest()
-        let sortDescriptor = NSSortDescriptor(key: "date", ascending: false)
-        fetchRequest.sortDescriptors = [sortDescriptor]
-        
-        do {
-            let todoEntities = try persistentContainer.viewContext.fetch(fetchRequest)
-            let todos = todoEntities.map { entity in
-                Todo(id: entity.id ?? UUID(),
-                     title: entity.todoTitle ?? "",
-                     description: entity.todoDescription ?? "",
-                     date: entity.date ?? Date(),
-                     completed: entity.completed)
-            }
-            completion(.success(todos))
-        } catch {
-            completion(.failure(error))
-        }
-    }
-    
-    func createTodo(newTodo: Todo) {
-        let context = persistentContainer.viewContext
-        guard let todoEntity = NSEntityDescription.entity(forEntityName: "TodoEntity", in: context) else {
-            fatalError("Failed to create Todo entity description.")
-        }
-        
-        let todo = NSManagedObject(entity: todoEntity, insertInto: context)
-        todo.setValue(newTodo.id, forKey: "id")
-        todo.setValue(newTodo.title, forKey: "todoTitle")
-        todo.setValue(newTodo.description, forKey: "todoDescription")
-        todo.setValue(newTodo.date, forKey: "date")
-        todo.setValue(newTodo.completed, forKey: "completed")
-        
-        saveContext()
-        
-        NotificationCenter.default.post(
-            name: Notification.Name("TodoAdded"),
-            object: nil,
-            userInfo: ["todo": newTodo]
-        )
-    }
-    
-    func updateTodo(updatedTodo: Todo) {
-        let context = persistentContainer.viewContext
-        let fetchRequest: NSFetchRequest<NSManagedObject> = NSFetchRequest<NSManagedObject>(entityName: "TodoEntity")
-        fetchRequest.predicate = NSPredicate(format: "id == %@", updatedTodo.id as CVarArg)
-        
-        do {
-            let results = try context.fetch(fetchRequest)
-            if let todo = results.first {
-                todo.setValue(updatedTodo.title, forKey: "todoTitle")
-                todo.setValue(updatedTodo.description, forKey: "todoDescription")
-                todo.setValue(Date(), forKey: "date")
-                todo.setValue(updatedTodo.completed, forKey: "completed")
-                saveContext()
-                
-                NotificationCenter.default.post(
-                    name: Notification.Name("TodoEdited"),
-                    object: nil,
-                    userInfo: ["todo": updatedTodo]
-                )
-            }
-        } catch {
-            print("Failed to update todo: \(error)")
-        }
-    }
-    
-    func deleteTodo(id: UUID) {
-        let context = persistentContainer.viewContext
-        let fetchRequest: NSFetchRequest<NSManagedObject> = NSFetchRequest<NSManagedObject>(entityName: "TodoEntity")
-        fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
-        
-        do {
-            let results = try context.fetch(fetchRequest)
-            if let todo = results.first {
-                context.delete(todo)
-                saveContext()
-                
-                NotificationCenter.default.post(
-                    name: Notification.Name("TodoDeleted"),
-                    object: nil,
-                    userInfo: ["todoId": id]
-                )
-            }
-        } catch {
-            print("Failed to delete todo: \(error)")
-        }
-    }
-    
-    func deleteAllTodos() {
-        let context = persistentContainer.viewContext
-        let fetchRequest: NSFetchRequest<NSManagedObject> = NSFetchRequest<NSManagedObject>(entityName: "TodoEntity")
-
-        do {
-            let results = try context.fetch(fetchRequest)
-            for object in results {
-                context.delete(object)
-            }
-            saveContext()
+        backgroundQueue.async { [weak self] in
+            guard let self = self else { return }
+            let context = self.persistentContainer.viewContext
             
-            NotificationCenter.default.post(
-                name: Notification.Name("AllTodosDeleted"),
-                object: nil
-            )
-        } catch {
-            print("Failed to delete all todos: \(error)")
+            do {
+                let fetchRequest: NSFetchRequest<TodoEntity> = TodoEntity.fetchRequest()
+                let sortDescriptor = NSSortDescriptor(key: "date", ascending: false)
+                fetchRequest.sortDescriptors = [sortDescriptor]
+                
+                let todoEntities = try context.fetch(fetchRequest)
+                let todos = todoEntities.map { entity in
+                    Todo(id: entity.id ?? UUID(),
+                         title: entity.todoTitle ?? "",
+                         description: entity.todoDescription ?? "",
+                         date: entity.date ?? Date(),
+                         completed: entity.completed)
+                }
+                
+                DispatchQueue.main.async {
+                    completion(.success(todos))
+                }
+            } catch {
+                DispatchQueue.main.async {
+                    completion(.failure(error))
+                }
+            }
+        }
+    }
+    
+    func createTodo(newTodo: Todo, completion: ((Error?) -> Void)? = nil) {
+        backgroundQueue.async { [weak self] in
+            guard let self = self else { return }
+            let context = self.persistentContainer.viewContext
+            
+            let todoEntity = TodoEntity(context: context)
+            todoEntity.id = newTodo.id
+            todoEntity.todoTitle = newTodo.title
+            todoEntity.todoDescription = newTodo.description
+            todoEntity.date = newTodo.date
+            todoEntity.completed = newTodo.completed
+            
+            self.saveContext { error in
+                if error == nil {
+                    DispatchQueue.main.async {
+                        NotificationCenter.default.post(
+                            name: Notification.Name("TodoAdded"),
+                            object: nil,
+                            userInfo: ["todo": newTodo]
+                        )
+                    }
+                }
+                completion?(error)
+            }
+        }
+    }
+    
+    func updateTodo(todo: Todo, completion: ((Error?) -> Void)? = nil) {
+        backgroundQueue.async { [weak self] in
+            guard let self = self else { return }
+            let context = self.persistentContainer.viewContext
+            
+            do {
+                let fetchRequest: NSFetchRequest<TodoEntity> = TodoEntity.fetchRequest()
+                fetchRequest.predicate = NSPredicate(format: "id == %@", todo.id as CVarArg)
+                
+                let results = try context.fetch(fetchRequest)
+                if let todoEntity = results.first {
+                    todoEntity.todoTitle = todo.title
+                    todoEntity.todoDescription = todo.description
+                    todoEntity.date = todo.date
+                    todoEntity.completed = todo.completed
+                    
+                    self.saveContext { error in
+                        if error == nil {
+                            DispatchQueue.main.async {
+                                NotificationCenter.default.post(
+                                    name: Notification.Name("TodoEdited"),
+                                    object: nil,
+                                    userInfo: ["todo": todo]
+                                )
+                            }
+                        }
+                        completion?(error)
+                    }
+                }
+            } catch {
+                completion?(error)
+            }
+        }
+    }
+    
+    func deleteTodo(id: UUID, completion: ((Error?) -> Void)? = nil) {
+        backgroundQueue.async { [weak self] in
+            guard let self = self else { return }
+            let context = self.persistentContainer.viewContext
+            
+            do {
+                let fetchRequest: NSFetchRequest<TodoEntity> = TodoEntity.fetchRequest()
+                fetchRequest.predicate = NSPredicate(format: "id == %@", id as CVarArg)
+                
+                let results = try context.fetch(fetchRequest)
+                if let todoEntity = results.first {
+                    context.delete(todoEntity)
+                    self.saveContext { error in
+                        if error == nil {
+                            DispatchQueue.main.async {
+                                NotificationCenter.default.post(
+                                    name: Notification.Name("TodoDeleted"),
+                                    object: nil,
+                                    userInfo: ["todoId": id]
+                                )
+                            }
+                        }
+                        completion?(error)
+                    }
+                }
+            } catch {
+                completion?(error)
+            }
+        }
+    }
+    
+    func deleteAllTodos(completion: ((Error?) -> Void)? = nil) {
+        backgroundQueue.async { [weak self] in
+            guard let self = self else { return }
+            let context = self.persistentContainer.viewContext
+            
+            do {
+                let fetchRequest: NSFetchRequest<NSFetchRequestResult> = TodoEntity.fetchRequest()
+                let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+                
+                try context.execute(deleteRequest)
+                self.saveContext { error in
+                    if error == nil {
+                        DispatchQueue.main.async {
+                            NotificationCenter.default.post(
+                                name: Notification.Name("AllTodosDeleted"),
+                                object: nil
+                            )
+                        }
+                    }
+                    completion?(error)
+                }
+            } catch {
+                completion?(error)
+            }
         }
     }
 }

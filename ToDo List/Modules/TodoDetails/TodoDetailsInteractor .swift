@@ -1,49 +1,43 @@
 import Foundation
 
 final class TodoDetailsInteractor: TodoDetailsInteractorProtocol {
-
-    // MARK: - Properties
-
     weak var presenter: TodoDetailsPresenterProtocol?
-
-    // MARK: - TodoDetailsInteractorProtocol Methods
-
+    private let coreDataManager: CoreDataManager
+    
+    init(coreDataManager: CoreDataManager) {
+        self.coreDataManager = coreDataManager
+    }
+    
     func handleCreateTodo(title: String, description: String) {
         guard !title.isEmpty || !description.isEmpty else { return }
-
-        let newTodo = Todo(id: UUID(),
-                           title: title,
-                           description: description,
-                           date: Date(),
-                           completed: false)
-
-        CoreDataManager.shared.createTodo(newTodo: newTodo)
         
-        presenter?.finishedHandlingTodo()
+        let newTodo = Todo(id: UUID(),
+                          title: title,
+                          description: description,
+                          date: Date(),
+                          completed: false)
+        
+        coreDataManager.createTodo(newTodo: newTodo, completion: nil)
     }
-
+    
     func handleEditTodo(id: UUID, newTitle: String, newDescription: String,
-                        oldTitle: String, oldDescription: String, completed: Bool) {
-
+                       oldTitle: String, oldDescription: String, completed: Bool) {
+        
         if newTitle.isEmpty && newDescription.isEmpty {
-            CoreDataManager.shared.deleteTodo(id: id)
-            presenter?.finishedHandlingTodo()
+            coreDataManager.deleteTodo(id: id, completion: nil)
             return
         }
-
+        
         guard newTitle != oldTitle || newDescription != oldDescription else {
-            presenter?.finishedHandlingTodo()
             return
         }
         
         let updatedTodo = Todo(id: id,
-                               title: newTitle,
-                               description: newDescription,
-                               date: Date(),
-                               completed: completed)
+                             title: newTitle,
+                             description: newDescription,
+                             date: Date(),
+                             completed: completed)
         
-        CoreDataManager.shared.updateTodo(updatedTodo: updatedTodo)
-
-        presenter?.finishedHandlingTodo()
+        coreDataManager.updateTodo(todo: updatedTodo, completion: nil)
     }
 }

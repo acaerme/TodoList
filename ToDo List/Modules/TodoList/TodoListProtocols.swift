@@ -5,14 +5,14 @@ import UIKit
 
 protocol TodoListViewProtocol: AnyObject {
     var presenter: TodoListPresenterProtocol? { get set }
-    func update(with todos: [Todo])
-    func enterNoTodosState()
+    func update(with viewModel: TodoListViewModel)
 }
 
 // MARK: - TodoListInteractorProtocol
 
 protocol TodoListInteractorProtocol: AnyObject {
     var presenter: TodoListPresenterProtocol? { get set }
+    
     func fetchTodos()
     func filterTodos(with searchText: String)
     func updateTodo(updatedTodo: Todo)
@@ -45,8 +45,10 @@ protocol TodoListPresenterProtocol: AnyObject {
 
 protocol TodoListRouterProtocol: AnyObject {
     var viewController: TodoListViewController? { get set }
+    
     static func createModule() -> TodoListViewController
-    func showDetails(for todo: Todo)
     func presentTodoDetailsVC(todo: Todo?)
     func presentShareSheet(todoTitle: String)
+    func presentErrorAlert(alert: UIAlertController)
+    func presentDeleteAllTodosAlert(alert: UIAlertController)
 }

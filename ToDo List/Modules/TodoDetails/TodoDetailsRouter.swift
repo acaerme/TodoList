@@ -10,7 +10,7 @@ final class TodoDetailsRouter: TodoDetailsRouterProtocol {
 
     static func createModule(with todo: Todo?) -> TodoDetailsViewController {
         let view = TodoDetailsViewController()
-        let interactor = TodoDetailsInteractor()
+        let interactor = TodoDetailsInteractor(coreDataManager: DependencyContainer.shared.container.resolve(CoreDataManager.self)!)
         let presenter = TodoDetailsPresenter(todo: todo)
         let router = TodoDetailsRouter()
 
@@ -24,9 +24,5 @@ final class TodoDetailsRouter: TodoDetailsRouterProtocol {
         router.viewController = view
 
         return view
-    }
-
-    func dismissVC() {
-        viewController?.dismiss(animated: true, completion: nil)
     }
 }

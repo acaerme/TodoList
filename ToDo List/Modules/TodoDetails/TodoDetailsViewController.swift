@@ -1,7 +1,7 @@
 import UIKit
 import SnapKit
 
-final class TodoDetailsViewController: UIViewController {
+class TodoDetailsViewController: UIViewController {
     
     // MARK: - Properties
     
