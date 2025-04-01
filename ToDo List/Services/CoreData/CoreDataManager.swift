@@ -98,15 +98,6 @@ class CoreDataManager {
             todoEntity.completed = newTodo.completed
             
             self.saveContext { error in
-                if error == nil {
-                    DispatchQueue.main.async {
-                        NotificationCenter.default.post(
-                            name: Notification.Name("TodoAdded"),
-                            object: nil,
-                            userInfo: ["todo": newTodo]
-                        )
-                    }
-                }
                 completion?(error)
             }
         }
@@ -129,15 +120,6 @@ class CoreDataManager {
                     todoEntity.completed = todo.completed
                     
                     self.saveContext { error in
-                        if error == nil {
-                            DispatchQueue.main.async {
-                                NotificationCenter.default.post(
-                                    name: Notification.Name("TodoEdited"),
-                                    object: nil,
-                                    userInfo: ["todo": todo]
-                                )
-                            }
-                        }
                         completion?(error)
                     }
                 }
@@ -160,15 +142,6 @@ class CoreDataManager {
                 if let todoEntity = results.first {
                     context.delete(todoEntity)
                     self.saveContext { error in
-                        if error == nil {
-                            DispatchQueue.main.async {
-                                NotificationCenter.default.post(
-                                    name: Notification.Name("TodoDeleted"),
-                                    object: nil,
-                                    userInfo: ["todoId": id]
-                                )
-                            }
-                        }
                         completion?(error)
                     }
                 }
@@ -188,17 +161,10 @@ class CoreDataManager {
                 let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
                 
                 try context.execute(deleteRequest)
-                self.saveContext { error in
-                    if error == nil {
-                        DispatchQueue.main.async {
-                            NotificationCenter.default.post(
-                                name: Notification.Name("AllTodosDeleted"),
-                                object: nil
-                            )
-                        }
-                    }
-                    completion?(error)
-                }
+                
+                completion?(nil)
+                
+                self.saveContext()
             } catch {
                 completion?(error)
             }

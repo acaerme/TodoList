@@ -42,11 +42,7 @@ final class TodoListRouter: TodoListRouterProtocol {
         viewController?.present(activityViewController, animated: true)
     }
     
-    func presentErrorAlert(alert: UIAlertController) {
-        viewController?.present(alert, animated: true)
-    }
-    
-    func presentDeleteAllTodosAlert(alert: UIAlertController) {
+    func presentAlert(alert: UIAlertController) {
         viewController?.present(alert, animated: true)
     }
 }

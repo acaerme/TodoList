@@ -157,9 +157,10 @@ private final class MockTodoListInteractor: TodoListInteractorProtocol {
         fetchTodosCalled = true
     }
     
-    func filterTodos(with searchText: String) {
+    func filterTodos(with searchText: String, completion: @escaping (([Todo]) -> Void)) {
         filterTodosCalled = true
         lastSearchText = searchText
+        completion([]) // Return empty array for testing
     }
     
     func updateTodo(updatedTodo: Todo) {

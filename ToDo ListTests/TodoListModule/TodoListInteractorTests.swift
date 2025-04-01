@@ -75,13 +75,11 @@ final class TodoListInteractorTests: XCTestCase {
         let expectation = XCTestExpectation(description: "Wait for filtering")
         
         // When
-        sut.filterTodos(with: "")
-        
-        // Then
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            XCTAssertEqual(self.mockPresenter.lastTodos?.count, 2)
-            XCTAssertEqual(self.mockPresenter.lastTodos?[0].title, "First Todo")
-            XCTAssertEqual(self.mockPresenter.lastTodos?[1].title, "Second Todo")
+        sut.filterTodos(with: "") { filteredTodos in
+            // Then
+            XCTAssertEqual(filteredTodos.count, 2)
+            XCTAssertEqual(filteredTodos[0].title, "First Todo")
+            XCTAssertEqual(filteredTodos[1].title, "Second Todo")
             expectation.fulfill()
         }
         
@@ -92,7 +90,7 @@ final class TodoListInteractorTests: XCTestCase {
         // Given
         let testTodos = createTestTodos()
         sut.presenter = mockPresenter
-        
+
         // Add todos
         NotificationCenter.default.post(name: NSNotification.Name("TodoAdded"),
                                       object: nil,
@@ -100,19 +98,17 @@ final class TodoListInteractorTests: XCTestCase {
         NotificationCenter.default.post(name: NSNotification.Name("TodoAdded"),
                                       object: nil,
                                       userInfo: ["todo": testTodos[0]])
-        
+
         let expectation = XCTestExpectation(description: "Wait for filtering")
-        
+
         // When
-        sut.filterTodos(with: "First")
-        
-        // Then
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            XCTAssertEqual(self.mockPresenter.lastTodos?.count, 1)
-            XCTAssertEqual(self.mockPresenter.lastTodos?[0].title, "First Todo")
+        sut.filterTodos(with: "First") { filteredTodos in
+            // Then
+            XCTAssertEqual(filteredTodos.count, 1)
+            XCTAssertEqual(filteredTodos[0].title, "First Todo")
             expectation.fulfill()
         }
-        
+
         wait(for: [expectation], timeout: 1.0)
     }
     

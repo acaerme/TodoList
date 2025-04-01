@@ -213,6 +213,7 @@ class TodoListViewController: UIViewController {
 
 extension TodoListViewController: TodoListViewProtocol {
     func update(with viewModel: TodoListViewModel) {
+        print(viewModel.todos)
         DispatchQueue.main.async { [weak self] in
             self?.todos = viewModel.todos
             self?.noTodosLabel.isHidden = viewModel.isNoTodosHidden
@@ -254,6 +255,7 @@ extension TodoListViewController: UITableViewDataSource, UITableViewDelegate {
         let todo = todos[indexPath.row]
         return presenter?.contextMenuConfiguration(for: todo, at: indexPath)
     }
+    
 }
 
 // MARK: - TodoTableViewCellDelegate

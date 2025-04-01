@@ -14,7 +14,7 @@ protocol TodoListInteractorProtocol: AnyObject {
     var presenter: TodoListPresenterProtocol? { get set }
     
     func fetchTodos()
-    func filterTodos(with searchText: String)
+    func filterTodos(with searchText: String, completion: @escaping (([Todo]) -> Void))
     func updateTodo(updatedTodo: Todo)
     func delete(id: UUID)
     func deleteAllTodos()
@@ -37,7 +37,7 @@ protocol TodoListPresenterProtocol: AnyObject {
     func deleteButtonTapped(todo: Todo?)
     func shareButtonTapped(todo: Todo)
     func deleteAllTodosButtonTapped()
-    func getTaskCountText(for count: Int) -> String
+    func presentStandardErrorAlert()
     func contextMenuConfiguration(for todo: Todo, at indexPath: IndexPath) -> UIContextMenuConfiguration
 }
 
@@ -49,6 +49,5 @@ protocol TodoListRouterProtocol: AnyObject {
     static func createModule() -> TodoListViewController
     func presentTodoDetailsVC(todo: Todo?)
     func presentShareSheet(todoTitle: String)
-    func presentErrorAlert(alert: UIAlertController)
-    func presentDeleteAllTodosAlert(alert: UIAlertController)
+    func presentAlert(alert: UIAlertController)
 }

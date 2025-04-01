@@ -12,19 +12,49 @@ final class TodoDetailsInteractor: TodoDetailsInteractorProtocol {
         guard !title.isEmpty || !description.isEmpty else { return }
         
         let newTodo = Todo(id: UUID(),
-                          title: title,
-                          description: description,
-                          date: Date(),
-                          completed: false)
+                           title: title,
+                           description: description,
+                           date: Date(),
+                           completed: false)
         
-        coreDataManager.createTodo(newTodo: newTodo, completion: nil)
+        coreDataManager.createTodo(newTodo: newTodo) { error in
+            if error == nil {
+                guard error == nil else {
+                    NotificationCenter.default.post(
+                        name: Notification.Name("ErrorOccuredWithCoreData"),
+                        object: nil
+                    )
+                    return
+                }
+                
+                NotificationCenter.default.post(
+                    name: Notification.Name("TodoAdded"),
+                    object: nil,
+                    userInfo: ["todo": newTodo]
+                )
+            }
+        }
     }
     
     func handleEditTodo(id: UUID, newTitle: String, newDescription: String,
                        oldTitle: String, oldDescription: String, completed: Bool) {
         
         if newTitle.isEmpty && newDescription.isEmpty {
-            coreDataManager.deleteTodo(id: id, completion: nil)
+            coreDataManager.deleteTodo(id: id) { error in
+                guard error == nil else {
+                    NotificationCenter.default.post(
+                        name: Notification.Name("ErrorOccuredWithCoreData"),
+                        object: nil
+                    )
+                    return
+                }
+                
+                NotificationCenter.default.post(
+                    name: Notification.Name("TodoDeleted"),
+                    object: nil,
+                    userInfo: ["todoId": id]
+                )
+            }
             return
         }
         
@@ -38,6 +68,20 @@ final class TodoDetailsInteractor: TodoDetailsInteractorProtocol {
                              date: Date(),
                              completed: completed)
         
-        coreDataManager.updateTodo(todo: updatedTodo, completion: nil)
+        coreDataManager.updateTodo(todo: updatedTodo) { error in
+            guard error == nil else {
+                NotificationCenter.default.post(
+                    name: Notification.Name("ErrorOccuredWithCoreData"),
+                    object: nil
+                )
+                return
+            }
+            
+            NotificationCenter.default.post(
+                name: Notification.Name("TodoEdited"),
+                object: nil,
+                userInfo: ["todo": updatedTodo]
+            )
+        }
     }
 }

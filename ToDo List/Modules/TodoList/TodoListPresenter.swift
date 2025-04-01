@@ -30,6 +30,7 @@ final class TodoListPresenter: TodoListPresenterProtocol {
     func updateTodosList(with result: Result<[Todo], Error>) {
         switch result {
         case .success(let todos):
+            print(todos.count)
             let viewModel = TodoListViewModel(
                 todos: todos,
                 taskCountText: self.getTaskCountText(for: todos.count),
@@ -39,10 +40,12 @@ final class TodoListPresenter: TodoListPresenterProtocol {
             )
             self.view?.update(with: viewModel)
         case .failure(_):
-            let alert = UIAlertController(title: "Error", message: "Failed to fetch todos.", preferredStyle: .alert)
+            let alert = setupAlert(title: "Error",
+                                   message: "Failed to fetch todos.")
+            
             alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
             
-            self.router?.presentErrorAlert(alert: alert)
+            self.router?.presentAlert(alert: alert)
         }
     }
     
@@ -61,7 +64,9 @@ final class TodoListPresenter: TodoListPresenterProtocol {
     }
     
     func searchForTodos(with searchText: String) {
-        interactor?.filterTodos(with: searchText)
+        interactor?.filterTodos(with: searchText) { [weak self] todos in
+            self?.updateTodosList(with: .success(todos))
+        }
     }
     
     func editButtonTapped(todo: Todo?) {
@@ -77,9 +82,9 @@ final class TodoListPresenter: TodoListPresenterProtocol {
     }
     
     func deleteAllTodosButtonTapped() {
-        let alert = UIAlertController(title: "Delete all todos",
-                                      message: "Are you sure that you want to delete all todos? This action can not be undone.",
-                                      preferredStyle: .alert)
+        print("CALLLLLL")
+        let alert = setupAlert(title: "Delete all todos",
+                               message: "Are you sure that you want to delete all todos? This action can not be undone.")
         
         let deleteAction = UIAlertAction(title: "Delete", style: .destructive) { _ in
             self.interactor?.deleteAllTodos()
@@ -89,13 +94,27 @@ final class TodoListPresenter: TodoListPresenterProtocol {
         alert.addAction(deleteAction)
         alert.addAction(cancelAction)
         
-        self.router?.presentErrorAlert(alert: alert)
+        self.router?.presentAlert(alert: alert)
     }
     
     func shareButtonTapped(todo: Todo) {
         let title = todo.title ?? ""
         
         router?.presentShareSheet(todoTitle: title)
+    }
+    
+    func setupAlert(title: String, message: String?) -> UIAlertController {
+        let alert = UIAlertController(title: title,
+                                      message: message,
+                                      preferredStyle: .alert)
+        return alert
+    }
+    
+    func presentStandardErrorAlert() {
+        let alert = setupAlert(title: "Error",
+                                 message: "Something went wrong.")
+          
+        router?.presentAlert(alert: alert)
     }
     
     // MARK: - Context Menu

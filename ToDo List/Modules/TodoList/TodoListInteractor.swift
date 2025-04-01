@@ -3,6 +3,7 @@
 import Foundation
 
 final class TodoListInteractor: TodoListInteractorProtocol {
+    
     private let networkManager: NetworkManagerProtocol
     private let coreDataManager: CoreDataManager
     private var allTodos: [Todo] = []
@@ -25,8 +26,8 @@ final class TodoListInteractor: TodoListInteractorProtocol {
                                              name: NSNotification.Name("TodoDeleted"),
                                              object: nil)
         NotificationCenter.default.addObserver(self,
-                                             selector: #selector(allTodosDeleted(_:)),
-                                             name: NSNotification.Name("AllTodosDeleted"),
+                                             selector: #selector(somethingWentWrong(_:)),
+                                             name: NSNotification.Name("ErrorOccurredWithCoreData"),
                                              object: nil)
     }
     
@@ -41,7 +42,16 @@ final class TodoListInteractor: TodoListInteractorProtocol {
     
     private func reflectUpdatedTodo(updatedTodo: Todo) {
         if let index = allTodos.firstIndex(where: { $0.id == updatedTodo.id }) {
-            allTodos[index] = updatedTodo
+            let oldTodo = allTodos[index]
+            
+            if oldTodo.completed != updatedTodo.completed {
+                allTodos.remove(at: index)
+                allTodos.insert(updatedTodo, at: index)
+            } else {
+                allTodos.remove(at: index)
+                allTodos.insert(updatedTodo, at: 0)
+            }
+            //later
             presenter?.updateTodosList(with: .success(allTodos))
         }
     }
@@ -54,6 +64,7 @@ final class TodoListInteractor: TodoListInteractorProtocol {
     }
     
     private func reflectAllTodosDeleted() {
+        print("calleddddd")
         allTodos.removeAll()
         presenter?.updateTodosList(with: .success(self.allTodos))
     }
@@ -117,33 +128,62 @@ final class TodoListInteractor: TodoListInteractorProtocol {
             }
         }
     
-    func filterTodos(with searchText: String) {
-            guard !searchText.isEmpty else {
-                presenter?.updateTodosList(with: .success(allTodos))
-                return
+    func filterTodos(with searchText: String, completion: @escaping (([Todo]) -> Void)) {
+        guard !searchText.isEmpty else {
+            completion(allTodos)
+            return
+        }
+
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            
+            let filteredTodos = self.allTodos.filter {
+                ($0.title ?? "").lowercased().contains(searchText.lowercased()) ||
+                ($0.description ?? "").lowercased().contains(searchText.lowercased())
             }
 
-            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                guard let self = self else { return }
-                let filteredTodos = self.allTodos.filter { ($0.title ?? "").lowercased().contains(searchText.lowercased()) }
-                
-                DispatchQueue.main.async {
-                    self.presenter?.updateTodosList(with: .success(filteredTodos))
-                }
+            DispatchQueue.main.async {
+                completion(filteredTodos)
             }
         }
+    }
     
     func updateTodo(updatedTodo: Todo) {
-        coreDataManager.updateTodo(todo: updatedTodo, completion: nil)
+        coreDataManager.updateTodo(todo: updatedTodo) { [weak self] error in
+            guard error == nil else {
+                self?.presenter?.presentStandardErrorAlert()
+                return
+            }
+            
+            self?.reflectUpdatedTodo(updatedTodo: updatedTodo)
+        }
     }
     
     func delete(id: UUID) {
-        print("udalu")
-        coreDataManager.deleteTodo(id: id, completion: nil)
+        coreDataManager.deleteTodo(id: id) { [weak self] error in
+            guard error == nil else {
+                self?.presenter?.presentStandardErrorAlert()
+                return
+            }
+            
+            self?.reflectDeletedTodo(id: id)
+        }
     }
     
     func deleteAllTodos() {
-        coreDataManager.deleteAllTodos(completion: nil)
+        print("udalyau")
+        coreDataManager.deleteAllTodos { [weak self] error in
+            print(1)
+            guard error == nil else {
+                print("oshibka")
+                self?.presenter?.presentStandardErrorAlert()
+                return
+            }
+            print(2)
+            print("tut")
+            print(self)
+            self?.reflectAllTodosDeleted()
+        }
     }
     
     private func isFirstLaunch() -> Bool {
@@ -165,7 +205,7 @@ final class TodoListInteractor: TodoListInteractorProtocol {
         reflectDeletedTodo(id: todoId)
     }
     
-    @objc private func allTodosDeleted(_ notification: Notification) {
-        reflectAllTodosDeleted()
+    @objc private func somethingWentWrong(_ notification: Notification) {
+        presenter?.presentStandardErrorAlert()
     }
 }

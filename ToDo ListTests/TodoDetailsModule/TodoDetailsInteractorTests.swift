@@ -37,75 +37,39 @@ final class TodoDetailsInteractorTests: XCTestCase {
     // MARK: - Tests
     
     func test_handleCreateTodo_withEmptyFields_doesNotCreateTodo() {
-        let expectation = XCTestExpectation(description: "Create todo completion")
-        
         sut.handleCreateTodo(title: "", description: "")
-        
-        // Give time for async operations
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            XCTAssertFalse(self.mockCoreDataManager.createTodoCalled)
-            expectation.fulfill()
-        }
-        
-        wait(for: [expectation], timeout: 1.0)
+        XCTAssertFalse(mockCoreDataManager.createTodoCalled)
     }
     
     func test_handleCreateTodo_withValidFields_createsTodoAndNotifiesPresenter() {
-        let expectation = XCTestExpectation(description: "Create todo completion")
-        
         sut.handleCreateTodo(title: "Test Title", description: "Test Description")
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            XCTAssertTrue(self.mockCoreDataManager.createTodoCalled)
-            expectation.fulfill()
-        }
-        
-        wait(for: [expectation], timeout: 1.0)
+        XCTAssertTrue(mockCoreDataManager.createTodoCalled)
     }
     
     func test_handleEditTodo_withEmptyFields_deletesTodoAndNotifiesPresenter() {
-        let expectation = XCTestExpectation(description: "Delete todo completion")
         let id = UUID()
         
         sut.handleEditTodo(id: id, newTitle: "", newDescription: "",
-                          oldTitle: "Old", oldDescription: "Old", completed: false)
+                           oldTitle: "Old", oldDescription: "Old", completed: false)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            XCTAssertTrue(self.mockCoreDataManager.deleteTodoCalled)
-            expectation.fulfill()
-        }
-        
-        wait(for: [expectation], timeout: 1.0)
+        XCTAssertTrue(mockCoreDataManager.deleteTodoCalled)
     }
     
     func test_handleEditTodo_withUnchangedFields_onlyNotifiesPresenter() {
-        let expectation = XCTestExpectation(description: "Update todo completion")
         let title = "Test"
         let description = "Test"
-        
+
         sut.handleEditTodo(id: UUID(), newTitle: title, newDescription: description,
-                          oldTitle: title, oldDescription: description, completed: false)
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            XCTAssertFalse(self.mockCoreDataManager.updateTodoCalled)
-            expectation.fulfill()
-        }
-        
-        wait(for: [expectation], timeout: 1.0)
+                           oldTitle: title, oldDescription: description, completed: false)
+
+        XCTAssertFalse(mockCoreDataManager.updateTodoCalled)
     }
     
     func test_handleEditTodo_withChangedFields_updatesTodoAndNotifiesPresenter() {
-        let expectation = XCTestExpectation(description: "Update todo completion")
-        
         sut.handleEditTodo(id: UUID(), newTitle: "New", newDescription: "New",
-                          oldTitle: "Old", oldDescription: "Old", completed: false)
+                           oldTitle: "Old", oldDescription: "Old", completed: false)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            XCTAssertTrue(self.mockCoreDataManager.updateTodoCalled)
-            expectation.fulfill()
-        }
-        
-        wait(for: [expectation], timeout: 1.0)
+        XCTAssertTrue(mockCoreDataManager.updateTodoCalled)
     }
 }
 
