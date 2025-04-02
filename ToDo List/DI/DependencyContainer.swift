@@ -17,7 +17,7 @@ final class DependencyContainer {
             NetworkManager(url: "https://dummyjson.com/todos")
         }.inObjectScope(.container)
         
-        container.register(CoreDataManager.self) { _ in
+        container.register(CoreDataManagerProtocol.self) { _ in
             CoreDataManager()
         }.inObjectScope(.container)
     }

@@ -59,7 +59,7 @@ final class TodoListPresenterTests: XCTestCase {
     func test_updateTodosList_withFailure_presentsErrorAlert() {
         sut.updateTodosList(with: .failure(NSError(domain: "", code: -1)))
         
-        XCTAssertTrue(mockRouter.presentErrorAlertCalled)
+        XCTAssertTrue(mockRouter.presentAlertCalled)
     }
     
     // MARK: - User Interaction Tests
@@ -83,7 +83,7 @@ final class TodoListPresenterTests: XCTestCase {
     func test_toggleTodoCompletion_callsInteractorToUpdate() {
         let todo = Todo(id: UUID(), title: "Test", description: "Test", date: Date(), completed: false)
         
-        sut.toggleTodoCompletion(for: todo)
+        sut.toggleTodo(todo: todo)
         
         XCTAssertTrue(mockInteractor.updateTodoCalled)
         XCTAssertEqual(mockInteractor.lastUpdatedTodo?.id, todo.id)
@@ -116,7 +116,7 @@ final class TodoListPresenterTests: XCTestCase {
     
     func test_deleteAllTodosButtonTapped_presentsDeleteAlert() {
         sut.deleteAllTodosButtonTapped()
-        XCTAssertTrue(mockRouter.presentErrorAlertCalled)
+        XCTAssertTrue(mockRouter.presentAlertCalled)
     }
     // MARK: - Helper Method Tests
     
@@ -178,13 +178,14 @@ private final class MockTodoListInteractor: TodoListInteractorProtocol {
     }
 }
 
+// MARK: - Mocks
+
 private final class MockTodoListRouter: TodoListRouterProtocol {
     var viewController: TodoListViewController?
     
     private(set) var presentTodoDetailsVCCalled = false
     private(set) var presentShareSheetCalled = false
-    private(set) var presentErrorAlertCalled = false
-    private(set) var presentDeleteAllTodosAlertCalled = false
+    private(set) var presentAlertCalled = false
     
     private(set) var lastPresentedTodo: Todo?
     private(set) var lastSharedTitle: String?
@@ -203,11 +204,7 @@ private final class MockTodoListRouter: TodoListRouterProtocol {
         lastSharedTitle = todoTitle
     }
     
-    func presentErrorAlert(alert: UIAlertController) {
-        presentErrorAlertCalled = true
-    }
-    
-    func presentDeleteAllTodosAlert(alert: UIAlertController) {
-        presentDeleteAllTodosAlertCalled = true
+    func presentAlert(alert: UIAlertController) {
+        presentAlertCalled = true
     }
 }

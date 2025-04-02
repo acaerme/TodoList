@@ -2,25 +2,24 @@ import UIKit
 
 // MARK: - TodoListRouter
 
-final class TodoListRouter: TodoListRouterProtocol {    
+final class TodoListRouter: TodoListRouterProtocol {
     
     // MARK: - Properties
     
     weak var viewController: TodoListViewController?
     
-    // MARK: - TodoListRouterProtocol Methods
+    // MARK: - Static Methods
     
     static func createModule() -> TodoListViewController {
         let view = TodoListViewController()
         let interactor = TodoListInteractor(
             networkManager: DependencyContainer.shared.container.resolve(NetworkManagerProtocol.self)!,
-            coreDataManager: DependencyContainer.shared.container.resolve(CoreDataManager.self)!
+            coreDataManager: DependencyContainer.shared.container.resolve(CoreDataManagerProtocol.self)!
         )
         let presenter = TodoListPresenter()
         let router = TodoListRouter()
         
         view.presenter = presenter
-        
         interactor.presenter = presenter
         
         presenter.view = view
@@ -32,17 +31,32 @@ final class TodoListRouter: TodoListRouterProtocol {
         return view
     }
     
+    // MARK: - TodoListRouterProtocol Methods
+    
     func presentTodoDetailsVC(todo: Todo?) {
         let todoDetailsViewController = TodoDetailsRouter.createModule(with: todo)
-        viewController?.navigationController?.pushViewController(todoDetailsViewController, animated: true)
+        
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.viewController?.navigationController?.pushViewController(todoDetailsViewController, animated: true)
+        }
     }
     
     func presentShareSheet(todoTitle: String) {
         let activityViewController = UIActivityViewController(activityItems: [todoTitle], applicationActivities: nil)
-        viewController?.present(activityViewController, animated: true)
+        presentViewController(activityViewController)
     }
     
     func presentAlert(alert: UIAlertController) {
-        viewController?.present(alert, animated: true)
+        presentViewController(alert)
+    }
+    
+    // MARK: - Private Methods
+    
+    private func presentViewController(_ viewControllerToPresent: UIViewController) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.viewController?.present(viewControllerToPresent, animated: true)
+        }
     }
 }

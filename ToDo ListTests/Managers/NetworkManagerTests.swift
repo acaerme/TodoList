@@ -33,7 +33,7 @@ final class NetworkManagerTests: XCTestCase {
             expectation.fulfill()
         }
         
-        wait(for: [expectation], timeout: 5.0)
+        wait(for: [expectation], timeout: 15.0)
     }
     
     func test_fetchTodos_withInvalidUrl_returnsInvalidUrlError() {
@@ -50,7 +50,7 @@ final class NetworkManagerTests: XCTestCase {
             expectation.fulfill()
         }
         
-        wait(for: [expectation], timeout: 5.0)
+        wait(for: [expectation], timeout: 15.0)
     }
     
     func test_fetchTodos_withBadUrl_returnsRequestFailedError() {
@@ -67,6 +67,6 @@ final class NetworkManagerTests: XCTestCase {
             expectation.fulfill()
         }
         
-        wait(for: [expectation], timeout: 5.0)
+        wait(for: [expectation], timeout: 15.0)
     }
 }

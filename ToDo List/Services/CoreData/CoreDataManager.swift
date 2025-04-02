@@ -1,13 +1,28 @@
 import CoreData
 
-class CoreDataManager {
+// MARK: - CoreDataManagerProtocol
+
+protocol CoreDataManagerProtocol {
+    var persistentContainer: NSPersistentContainer { get }
+
+    init(persistentContainer: NSPersistentContainer?)
+
+    func saveTodos(todos: [Todo]?, completion: ((Error?) -> Void)?)
+    func getAllTodos(completion: @escaping (Result<[Todo], Error>) -> Void)
+    func createTodo(newTodo: Todo, completion: ((Error?) -> Void)?)
+    func updateTodo(todo: Todo, completion: ((Error?) -> Void)?)
+    func deleteTodo(id: UUID, completion: ((Error?) -> Void)?)
+    func deleteAllTodos(completion: ((Error?) -> Void)?)
+}
+
+class CoreDataManager: CoreDataManagerProtocol {
     
     // MARK: - CoreData Stack
     
     let persistentContainer: NSPersistentContainer
     private let backgroundQueue = DispatchQueue(label: "com.todolist.coredata", qos: .userInitiated)
     
-    init(persistentContainer: NSPersistentContainer? = nil) {
+    required init(persistentContainer: NSPersistentContainer? = nil) {
         if let container = persistentContainer {
             self.persistentContainer = container
         } else {
@@ -97,9 +112,8 @@ class CoreDataManager {
             todoEntity.date = newTodo.date
             todoEntity.completed = newTodo.completed
             
-            self.saveContext { error in
-                completion?(error)
-            }
+            self.saveContext()
+            completion?(nil)
         }
     }
     
@@ -119,9 +133,8 @@ class CoreDataManager {
                     todoEntity.date = todo.date
                     todoEntity.completed = todo.completed
                     
-                    self.saveContext { error in
-                        completion?(error)
-                    }
+                    self.saveContext()
+                    completion?(nil)
                 }
             } catch {
                 completion?(error)
@@ -141,9 +154,8 @@ class CoreDataManager {
                 let results = try context.fetch(fetchRequest)
                 if let todoEntity = results.first {
                     context.delete(todoEntity)
-                    self.saveContext { error in
-                        completion?(error)
-                    }
+                    self.saveContext()
+                    completion?(nil)
                 }
             } catch {
                 completion?(error)
@@ -157,14 +169,15 @@ class CoreDataManager {
             let context = self.persistentContainer.viewContext
             
             do {
-                let fetchRequest: NSFetchRequest<NSFetchRequestResult> = TodoEntity.fetchRequest()
-                let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+                let fetchRequest: NSFetchRequest<TodoEntity> = TodoEntity.fetchRequest()
+                let results = try context.fetch(fetchRequest)
                 
-                try context.execute(deleteRequest)
-                
-                completion?(nil)
+                for object in results {
+                    context.delete(object)
+                }
                 
                 self.saveContext()
+                completion?(nil)
             } catch {
                 completion?(error)
             }

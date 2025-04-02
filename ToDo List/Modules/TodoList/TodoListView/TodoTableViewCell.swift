@@ -1,12 +1,6 @@
 import UIKit
 import SnapKit
 
-// MARK: - TodoTableViewCellDelegate
-
-protocol TodoTableViewCellDelegate: AnyObject {
-    func didToggleTodo(_ updatedTodo: Todo)
-}
-
 // MARK: - TodoTableViewCell
 
 final class TodoTableViewCell: UITableViewCell {
@@ -14,7 +8,6 @@ final class TodoTableViewCell: UITableViewCell {
     // MARK: - Properties
 
     private var todo: Todo?
-    weak var delegate: TodoTableViewCellDelegate?
     var selectCompletion: (() -> Void)?
 
     // MARK: - UI Elements

@@ -1,40 +1,31 @@
-// TodoListInteractor.swift
-
 import Foundation
+
+// MARK: - TodoListInteractor
 
 final class TodoListInteractor: TodoListInteractorProtocol {
     
-    private let networkManager: NetworkManagerProtocol
-    private let coreDataManager: CoreDataManager
-    private var allTodos: [Todo] = []
-    weak var presenter: TodoListPresenterProtocol?
-    private var currentSearchText: String = ""
+    // MARK: - Properties
     
-    init(networkManager: NetworkManagerProtocol, coreDataManager: CoreDataManager) {
+    private let networkManager: NetworkManagerProtocol
+    private let coreDataManager: CoreDataManagerProtocol
+    private var allTodos: [Todo] = []
+    private var currentSearchText: String = ""
+    weak var presenter: TodoListPresenterProtocol?
+    
+    // MARK: - Initialization
+    
+    init(networkManager: NetworkManagerProtocol, coreDataManager: CoreDataManagerProtocol) {
         self.networkManager = networkManager
         self.coreDataManager = coreDataManager
         
-        NotificationCenter.default.addObserver(self,
-                                             selector: #selector(todoAdded(_:)),
-                                             name: NSNotification.Name("TodoAdded"),
-                                             object: nil)
-        NotificationCenter.default.addObserver(self,
-                                             selector: #selector(todoEdited(_:)),
-                                             name: NSNotification.Name("TodoEdited"),
-                                             object: nil)
-        NotificationCenter.default.addObserver(self,
-                                             selector: #selector(todoDeleted(_:)),
-                                             name: NSNotification.Name("TodoDeleted"),
-                                             object: nil)
-        NotificationCenter.default.addObserver(self,
-                                             selector: #selector(somethingWentWrong(_:)),
-                                             name: NSNotification.Name("ErrorOccurredWithCoreData"),
-                                             object: nil)
+        setupNotifications()
     }
     
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
+    
+    // MARK: - Private Methods - Reflection
     
     private func reflectAddedTodo(newTodo: Todo) {
         allTodos.insert(newTodo, at: 0)
@@ -42,35 +33,35 @@ final class TodoListInteractor: TodoListInteractorProtocol {
     }
     
     private func reflectUpdatedTodo(updatedTodo: Todo) {
-        if let index = allTodos.firstIndex(where: { $0.id == updatedTodo.id }) {
-            let oldTodo = allTodos[index]
-            
-            if oldTodo.completed != updatedTodo.completed {
-                allTodos.remove(at: index)
-                allTodos.insert(updatedTodo, at: index)
-            } else {
-                allTodos.remove(at: index)
-                allTodos.insert(updatedTodo, at: 0)
-            }
-            //later
-            
-            filterTodos(with: currentSearchText) { filteredTodos in
-                self.presenter?.updateTodosList(with: .success(filteredTodos))
-            }
+        guard let index = allTodos.firstIndex(where: { $0.id == updatedTodo.id }) else { return }
+        
+        let oldTodo = allTodos[index]
+        
+        if oldTodo.completed != updatedTodo.completed {
+            allTodos.remove(at: index)
+            allTodos.insert(updatedTodo, at: index)
+        } else {
+            allTodos.remove(at: index)
+            allTodos.insert(updatedTodo, at: 0)
+        }
+        
+        filterTodos(with: currentSearchText) { filteredTodos in
+            self.presenter?.updateTodosList(with: .success(filteredTodos))
         }
     }
     
     private func reflectDeletedTodo(id: UUID) {
-        if let index = allTodos.firstIndex(where: { $0.id == id }) {
-            allTodos.remove(at: index)
-            presenter?.updateTodosList(with: .success(allTodos))
-        }
+        guard let index = allTodos.firstIndex(where: { $0.id == id }) else { return }
+        allTodos.remove(at: index)
+        presenter?.updateTodosList(with: .success(allTodos))
     }
     
     private func reflectAllTodosDeleted() {
         allTodos.removeAll()
         presenter?.updateTodosList(with: .success(self.allTodos))
     }
+    
+    // MARK: - Public Methods - Data Fetching
     
     func fetchTodos() {
         if isFirstLaunch() {
@@ -80,56 +71,53 @@ final class TodoListInteractor: TodoListInteractorProtocol {
         }
     }
     
-    func fetchFromAPIAndSaveToCoreData() {
-            networkManager.fetchTodos { [weak self] result in
-                guard let self = self else { return }
+    private func fetchFromAPIAndSaveToCoreData() {
+        networkManager.fetchTodos { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let networkResponse):
+                UserDefaults.standard.set(true, forKey: "HasLaunchedBefore")
+                UserDefaults.standard.synchronize()
+                let todos = networkResponse.todos.map {
+                    Todo(id: UUID(),
+                         title: $0.todo,
+                         description: "Description",
+                         date: Date(),
+                         completed: $0.completed)
+                }
                 
-                switch result {
-                case .success(let networkResponse):
-                    let todos = networkResponse.todos.map {
-                        Todo(id: UUID(),
-                             title: $0.todo,
-                             description: "Description",
-                             date: Date(),
-                             completed: $0.completed)
-                    }
-                    
-                    self.coreDataManager.saveTodos(todos: todos) { error in
-                        DispatchQueue.main.async {
-                            if let error = error {
-                                self.presenter?.updateTodosList(with: .failure(error))
-                            } else {
-                                self.allTodos = todos.reversed()
-                                self.presenter?.updateTodosList(with: .success(self.allTodos))
-                                UserDefaults.standard.set(true, forKey: "HasLaunchedBefore")
-                                UserDefaults.standard.synchronize()
-                            }
-                        }
-                    }
-                    
-                case .failure(let error):
-                    DispatchQueue.main.async {
+                self.coreDataManager.saveTodos(todos: todos) { error in
+                    if let error = error {
                         self.presenter?.updateTodosList(with: .failure(error))
+                    } else {
+                        self.allTodos = todos.reversed()
+                        self.presenter?.updateTodosList(with: .success(self.allTodos))
                     }
                 }
-            }
-        }
-    
-    func fetchFromCoreData() {
-            coreDataManager.getAllTodos { [weak self] result in
-                guard let self = self else { return }
                 
+            case .failure(let error):
                 DispatchQueue.main.async {
-                    switch result {
-                    case .success(let todos):
-                        self.allTodos = todos
-                        self.presenter?.updateTodosList(with: .success(todos))
-                    case .failure(let error):
-                        self.presenter?.updateTodosList(with: .failure(error))
-                    }
+                    self.presenter?.updateTodosList(with: .failure(error))
                 }
             }
         }
+    }
+    
+    private func fetchFromCoreData() {
+        coreDataManager.getAllTodos { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let todos):
+                self.allTodos = todos
+                self.presenter?.updateTodosList(with: .success(todos))
+            case .failure(let error):
+                self.presenter?.updateTodosList(with: .failure(error))
+            }
+        }
+    }
+    
+    // MARK: - Public Methods - Data Manipulation
     
     func filterTodos(with searchText: String, completion: @escaping (([Todo]) -> Void)) {
         currentSearchText = searchText
@@ -138,7 +126,7 @@ final class TodoListInteractor: TodoListInteractorProtocol {
             completion(allTodos)
             return
         }
-
+        
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self else { return }
             
@@ -146,7 +134,7 @@ final class TodoListInteractor: TodoListInteractorProtocol {
                 ($0.title ?? "").lowercased().contains(searchText.lowercased()) ||
                 ($0.description ?? "").lowercased().contains(searchText.lowercased())
             }
-
+            
             DispatchQueue.main.async {
                 completion(filteredTodos)
             }
@@ -186,8 +174,31 @@ final class TodoListInteractor: TodoListInteractorProtocol {
         }
     }
     
+    // MARK: - Private Methods - Helpers
+    
     private func isFirstLaunch() -> Bool {
         return !UserDefaults.standard.bool(forKey: "HasLaunchedBefore")
+    }
+    
+    // MARK: - Private Methods - Notification Handling
+    
+    private func setupNotifications() {
+        NotificationCenter.default.addObserver(self,
+                                             selector: #selector(todoAdded(_:)),
+                                             name: NSNotification.Name("TodoAdded"),
+                                             object: nil)
+        NotificationCenter.default.addObserver(self,
+                                             selector: #selector(todoEdited(_:)),
+                                             name: NSNotification.Name("TodoEdited"),
+                                             object: nil)
+        NotificationCenter.default.addObserver(self,
+                                             selector: #selector(todoDeleted(_:)),
+                                             name: NSNotification.Name("TodoDeleted"),
+                                             object: nil)
+        NotificationCenter.default.addObserver(self,
+                                             selector: #selector(somethingWentWrong(_:)),
+                                             name: NSNotification.Name("ErrorOccurredWithCoreData"),
+                                             object: nil)
     }
     
     @objc private func todoAdded(_ notification: Notification) {

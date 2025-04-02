@@ -11,8 +11,8 @@ struct Todo {
 extension Todo: Equatable {
     public static func == (lhs: Todo, rhs: Todo) -> Bool {
         return lhs.id == rhs.id &&
-               lhs.title == rhs.title &&
-               lhs.description == rhs.description &&
-               lhs.completed == rhs.completed
+        lhs.title == rhs.title &&
+        lhs.description == rhs.description &&
+        lhs.completed == rhs.completed
     }
 }

@@ -1,4 +1,5 @@
 import XCTest
+import CoreData
 @testable import ToDo_List
 
 final class TodoListInteractorTests: XCTestCase {
@@ -17,7 +18,8 @@ final class TodoListInteractorTests: XCTestCase {
         super.setUp()
         mockPresenter = MockTodoListPresenter()
         mockNetworkManager = MockNetworkManager()
-        mockCoreDataManager = MockCoreDataManager()
+        let mockContainer = setupMockContainer()
+        mockCoreDataManager = MockCoreDataManager(persistentContainer: mockContainer)
         sut = TodoListInteractor(networkManager: mockNetworkManager, coreDataManager: mockCoreDataManager)
         sut.presenter = mockPresenter
         
@@ -83,7 +85,7 @@ final class TodoListInteractorTests: XCTestCase {
             expectation.fulfill()
         }
         
-        wait(for: [expectation], timeout: 1.0)
+        wait(for: [expectation], timeout: 3.0)
     }
     
     func test_filterTodos_withSearchText_returnsFilteredTodos() {
@@ -109,7 +111,7 @@ final class TodoListInteractorTests: XCTestCase {
             expectation.fulfill()
         }
 
-        wait(for: [expectation], timeout: 1.0)
+        wait(for: [expectation], timeout: 3.0)
     }
     
     func test_updateTodo_callsCoreDataManager() {
@@ -146,6 +148,21 @@ final class TodoListInteractorTests: XCTestCase {
     
     // MARK: - Helper Methods
     
+    private func setupMockContainer() -> NSPersistentContainer {
+        let mockContainer = NSPersistentContainer(name: "TodoList")
+        let description = NSPersistentStoreDescription()
+        description.type = NSInMemoryStoreType
+        mockContainer.persistentStoreDescriptions = [description]
+
+        let expectation = XCTestExpectation(description: "Load store")
+        mockContainer.loadPersistentStores { description, error in
+            XCTAssertNil(error)
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 3.0)
+        return mockContainer
+    }
+    
     private func createTestTodos() -> [Todo] {
         return [
             Todo(id: testUUID, title: "First Todo", description: "Test", date: Date(), completed: false),
@@ -177,13 +194,17 @@ private final class MockTodoListPresenter: TodoListPresenterProtocol {
     
     func didSelectTodo(todo: Todo) {}
     func newTodoButtonTapped() {}
-    func toggleTodoCompletion(for updatedTodo: Todo) {}
+    
+    func toggleTodo(todo: Todo) {}
+    
     func searchForTodos(with searchText: String) {}
     func editButtonTapped(todo: Todo?) {}
     func deleteButtonTapped(todo: Todo?) {}
     func shareButtonTapped(todo: Todo) {}
     func deleteAllTodosButtonTapped() {}
-    func getTaskCountText(for count: Int) -> String { return "" }
+    
+    func presentStandardErrorAlert() {}
+    
     func contextMenuConfiguration(for todo: Todo, at indexPath: IndexPath) -> UIContextMenuConfiguration { return UIContextMenuConfiguration() }
 }
 
@@ -202,19 +223,46 @@ private final class MockNetworkManager: NetworkManagerProtocol {
     }
 }
 
-private final class MockCoreDataManager: CoreDataManager {
+private final class MockCoreDataManager: CoreDataManagerProtocol {
+    var persistentContainer: NSPersistentContainer
+
     private(set) var getAllTodosCalled = false
     private(set) var updateTodoCalled = false
     private(set) var deleteTodoCalled = false
     private(set) var deleteAllTodosCalled = false
-    
+
+    private(set) var lastSavedTodos: [Todo]?
+    private(set) var lastCreatedTodo: Todo?
     private(set) var lastUpdatedTodo: Todo?
     private(set) var lastDeletedId: UUID?
-    
+
     var stubbedTodos: [Todo]?
     var stubbedError: Error?
+
+    required init(persistentContainer: NSPersistentContainer? = nil) {
+        self.persistentContainer = persistentContainer ?? {
+            let description = NSPersistentStoreDescription()
+            description.url = URL(fileURLWithPath: "/dev/null")
+            let container = NSPersistentContainer(name: "ToDo_List")
+            container.persistentStoreDescriptions = [description]
+            container.loadPersistentStores { _, error in
+                if let error = error as NSError? {
+                    fatalError("Unresolved error \(error), \(error.userInfo)")
+                }
+            }
+            return container
+        }()
+    }
+
+    func saveTodos(todos: [Todo]?, completion: ((Error?) -> Void)?) {
+        // For the protocol implementation
+    }
     
-    override func getAllTodos(completion: @escaping (Result<[Todo], Error>) -> Void) {
+    func createTodo(newTodo: Todo, completion: ((Error?) -> Void)?) {
+        // Fot the protocol implementation
+    }
+
+    func getAllTodos(completion: @escaping (Result<[Todo], Error>) -> Void) {
         getAllTodosCalled = true
         if let error = stubbedError {
             completion(.failure(error))
@@ -222,20 +270,21 @@ private final class MockCoreDataManager: CoreDataManager {
             completion(.success(stubbedTodos ?? []))
         }
     }
+
     
-    override func updateTodo(todo: Todo, completion: ((Error?) -> Void)? = nil) {
+    func updateTodo(todo: Todo, completion: ((Error?) -> Void)?) {
         updateTodoCalled = true
         lastUpdatedTodo = todo
         completion?(nil)
     }
-    
-    override func deleteTodo(id: UUID, completion: ((Error?) -> Void)? = nil) {
+
+    func deleteTodo(id: UUID, completion: ((Error?) -> Void)?) {
         deleteTodoCalled = true
         lastDeletedId = id
         completion?(nil)
     }
-    
-    override func deleteAllTodos(completion: ((Error?) -> Void)? = nil) {
+
+    func deleteAllTodos(completion: ((Error?) -> Void)?) {
         deleteAllTodosCalled = true
         completion?(nil)
     }

@@ -10,7 +10,7 @@ final class TodoDetailsRouter: TodoDetailsRouterProtocol {
 
     static func createModule(with todo: Todo?) -> TodoDetailsViewController {
         let view = TodoDetailsViewController()
-        let interactor = TodoDetailsInteractor(coreDataManager: DependencyContainer.shared.container.resolve(CoreDataManager.self)!)
+        let interactor = TodoDetailsInteractor(coreDataManager:  DependencyContainer.shared.container.resolve(CoreDataManagerProtocol.self)!)
         let presenter = TodoDetailsPresenter(todo: todo)
         let router = TodoDetailsRouter()
 
