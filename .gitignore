@@ -87,7 +87,6 @@ iOSInjectionProject/
 ### SwiftPackageManager ###
 Packages
 xcuserdata
-*.xcodeproj
 
 ### Added by me ###
 .DS_Store
